@@ -5,7 +5,6 @@ import { landing } from "../content/landing-copy";
 import {
   CLIENT_TABS,
   LOCAL_INSTALL_COMMAND,
-  ONS_MINT_URL,
   ROOM_URL_PLACEHOLDER,
   stepTwo,
   type ClientId,
@@ -13,6 +12,7 @@ import {
 } from "../lib/install-copy";
 import { track } from "../lib/telemetry";
 import { CopyButton } from "./CopyButton";
+import { mintRoom, type OnsGrant } from "../lib/mint-room";
 import { QrCode } from "./QrCode";
 
 /* Generic glyphs, not vendor logos (design round 2: a glyph is a visual
@@ -82,11 +82,6 @@ function SecondAppGlyph() {
   );
 }
 
-interface OnsGrant {
-  url: string;
-  expiresAt: string;
-}
-
 /**
  * §1 of the landing page.
  *
@@ -135,10 +130,8 @@ export function Installer({ id = "installer" }: { id?: string }) {
     setError(null);
     window.dispatchEvent(new CustomEvent("lme:grant:pending"));
     try {
-      const res = await fetch(ONS_MINT_URL, { method: "POST" });
-      const body = (await res.json()) as OnsGrant & { error?: string };
-      if (!res.ok) throw new Error(body.error ?? `server answered ${res.status}`);
-      const next = { url: body.url, expiresAt: body.expiresAt };
+      // The shared mint path — hero, WebMCP, and this button are one contract.
+      const next = await mintRoom();
       setGrant(next);
       track("ons_minted");
       // Both creators broadcast; both listen; each dispatches only on its OWN

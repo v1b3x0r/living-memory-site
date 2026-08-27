@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { landing } from "../content/landing-copy";
 import { mintRoom, type OnsGrant } from "../lib/mint-room";
+import { buildShareLink } from "../lib/share-link";
 import { track } from "../lib/telemetry";
 import { CopyButton } from "./CopyButton";
 import { MobileSetupCard } from "./MobileSetupCard";
@@ -76,6 +77,13 @@ export function HeroMint() {
         <pre className="code code--room">{grant.url}</pre>
         <div className="hero-mint__actions">
           <CopyButton text={grant.url} label="Copy the room URL" />
+          {/* The invite funnel (2026-08-27): a friend who receives the raw
+              URL gets a credential with no door — the share link lands them
+              on /join, which explains itself. Room travels in the fragment. */}
+          <CopyButton
+            text={buildShareLink(grant.url)}
+            label="Copy an invite link for a friend"
+          />
           <span className="hero-mint__hint">
             Paste it into ChatGPT, Claude, Codex, Cursor, or any MCP client —{" "}
             <a href="#installer">the guide below shows each one</a>.

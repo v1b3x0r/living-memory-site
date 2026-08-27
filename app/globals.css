@@ -604,6 +604,13 @@ main {
   font-size: 0.8rem;
 }
 
+.join-actions {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin: 0.6rem 0;
+}
+
 /* Tier 1 mobile onboarding card — hidden on desktop by default; the hero's
    mobile breakpoint (900px, below) reveals it. Two actions, never more. */
 .mobile-setup {
