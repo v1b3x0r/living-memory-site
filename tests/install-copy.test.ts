@@ -23,3 +23,12 @@ test("remote install carries expiry truth and the same continuity check", () => 
   assert.match(prompt, new RegExp(installCopy.AGENT_GUIDE_URL ?? "never-match"));
   assert.match(prompt, /fresh session or client/i);
 });
+
+test("the Claude tab shares the one step 1 — the exception is retired (A159)", () => {
+  // Retired 2026-08-27 by the founder: claude.ai can add a room since
+  // 2026-08-23 (known-issues), so no client tab claims otherwise.
+  assert.ok(!("CLAUDE_CLOUD_STEP_ONE" in installCopy));
+  const step = installCopy.stepTwo("claude", "cloud", "https://lme.example/t/x/mcp");
+  assert.equal(step.code, "https://lme.example/t/x/mcp");
+  assert.match(step.lines.join(" "), /connector/i);
+});

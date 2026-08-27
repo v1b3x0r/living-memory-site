@@ -45,19 +45,12 @@ export const CLAUDE_CONNECTOR_DEEPLINK =
 
 export const LOCAL_INSTALL_COMMAND = `npx ${NPM_PACKAGE}`;
 
-/**
- * The Claude tab must never offer step 1 as a room, on either rail — a room
- * cannot be added on claude.ai today, and a default tab that fails its own
- * first step is worse than a tab that says so. On the Cloud rail its step 1 is
- * the paid world instead; on the Local rail it is the same npx command as
- * everyone else, which is not a room and so needs no exception.
- */
-export const CLAUDE_CLOUD_STEP_ONE = {
-  title: "This tab does not offer a room.",
-  note: "Sign in to a world of your own at lme.viibe.to/keep.",
-  cta: "Open lme.viibe.to/keep",
-  href: KEEP_PATH,
-} as const;
+/* The Claude tab offered no room while claude.ai genuinely could not add one.
+   That stopped being true on 2026-08-23 (our edge bot-protection was the
+   cause — see known-issues), and the founder retired the exception on
+   2026-08-27 (advisor A159): Claude now gets the same step 1 as every other
+   client. If rooms ever break on claude.ai again, put a dated entry on
+   known-issues first — do not resurrect a silent exception here. */
 
 export type ClientId = "chatgpt" | "cursor" | "claude-code" | "claude" | "any";
 

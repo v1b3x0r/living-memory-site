@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { landing } from "../content/landing-copy";
 import {
-  CLAUDE_CLOUD_STEP_ONE,
   CLIENT_TABS,
   LOCAL_INSTALL_COMMAND,
   ONS_MINT_URL,
@@ -130,7 +129,6 @@ export function Installer({ id = "installer" }: { id?: string }) {
 
   const roomUrl = grant?.url ?? ROOM_URL_PLACEHOLDER;
   const two = stepTwo(client, rail, roomUrl);
-  const claudeCloud = client === "claude" && rail === "cloud";
 
   async function mint() {
     setMinting(true);
@@ -207,14 +205,6 @@ export function Installer({ id = "installer" }: { id?: string }) {
               <p className="step__note">{landing.installer.steps.oneLocal.note}</p>
               <pre className="code code--inline">{LOCAL_INSTALL_COMMAND}</pre>
               <CopyButton text={LOCAL_INSTALL_COMMAND} label="Copy the command" />
-            </>
-          ) : claudeCloud ? (
-            <>
-              <h3>{CLAUDE_CLOUD_STEP_ONE.title}</h3>
-              <p className="step__note">{CLAUDE_CLOUD_STEP_ONE.note}</p>
-              <a className="button button--primary" href={CLAUDE_CLOUD_STEP_ONE.href}>
-                {CLAUDE_CLOUD_STEP_ONE.cta}
-              </a>
             </>
           ) : (
             <>
