@@ -6,6 +6,7 @@ import { Installer } from "../components/Installer";
 import { KnownIssuesStrip } from "../components/KnownIssuesStrip";
 import { Pricing } from "../components/Pricing";
 import { Telemetry } from "../components/Telemetry";
+import { WebMcpTools } from "../components/WebMcpTools";
 import { WhatHappened } from "../components/WhatHappened";
 import { WhatItsFor } from "../components/WhatItsFor";
 import { WorldEnv } from "../components/WorldEnv";
@@ -20,6 +21,8 @@ export default function Home() {
   return (
     <>
       <Telemetry event="landing_view" />
+      {/* WebMCP: the same room creator, offered to visiting agents. */}
+      <WebMcpTools />
       <WorldEnv />
       <Hero />
       <main id="main-content">

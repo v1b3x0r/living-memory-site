@@ -2,14 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { landing } from "../content/landing-copy";
-import { ONS_MINT_URL } from "../lib/install-copy";
+import { mintRoom, type OnsGrant } from "../lib/mint-room";
 import { track } from "../lib/telemetry";
 import { CopyButton } from "./CopyButton";
-
-interface OnsGrant {
-  url: string;
-  expiresAt: string;
-}
 
 /**
  * WS2 (2026-08-26): the hero IS the room creator — press the button, get the
@@ -59,10 +54,8 @@ export function HeroMint() {
     setError(null);
     window.dispatchEvent(new CustomEvent(GRANT_PENDING_EVENT));
     try {
-      const res = await fetch(ONS_MINT_URL, { method: "POST" });
-      const body = (await res.json()) as OnsGrant & { error?: string };
-      if (!res.ok) throw new Error(body.error ?? `server answered ${res.status}`);
-      const next = { url: body.url, expiresAt: body.expiresAt };
+      // The shared mint path — the WebMCP front desk calls the same one.
+      const next = await mintRoom();
       setGrant(next);
       track("ons_minted", { surface: "hero" });
       window.dispatchEvent(new CustomEvent(GRANT_EVENT, { detail: next }));
