@@ -604,6 +604,17 @@ main {
   font-size: 0.8rem;
 }
 
+.client-mark {
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+}
+
+.join-door {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .join-actions {
   display: flex;
   gap: 0.7rem;

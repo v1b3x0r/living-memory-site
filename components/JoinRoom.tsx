@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import {
   CLAUDE_CONNECTOR_DEEPLINK,
   SERVER_NAMES,
@@ -10,6 +10,7 @@ import { parseShareFragment } from "../lib/share-link";
 import { BASE_PATH } from "../lib/base-path";
 import { track } from "../lib/telemetry";
 import { CopyButton } from "./CopyButton";
+import { ClaudeMark, OpenAiMark } from "./ClientMarks";
 
 /**
  * The receiving end of a share link (2026-08-27 dogfood: a raw room URL in a
@@ -21,20 +22,27 @@ import { CopyButton } from "./CopyButton";
  * for menus, spelled-out ChatGPT steps, and the raw URL for anyone who knows
  * their own client. No name field — rooms have no names to set.
  */
+function subscribeToHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
+
 export function JoinRoom() {
-  // null = no/invalid fragment · string = the validated room URL.
-  // Starts null on the server render; the fragment exists only in the browser.
-  const [room, setRoom] = useState<string | null>(null);
-  const [checked, setChecked] = useState(false);
+  // The fragment is an external store the server never sees: the server
+  // snapshot is null (renders nothing, as before), the client snapshot is the
+  // live hash — and a hashchange re-renders for free.
+  const hash = useSyncExternalStore<string | null>(
+    subscribeToHash,
+    () => window.location.hash,
+    () => null,
+  );
+  const room = hash === null ? null : parseShareFragment(hash);
 
   useEffect(() => {
-    const parsed = parseShareFragment(window.location.hash);
-    setRoom(parsed);
-    setChecked(true);
-    if (parsed !== null) track("join_page_opened");
-  }, []);
+    if (room !== null) track("join_page_opened");
+  }, [room]);
 
-  if (!checked) return null;
+  if (hash === null) return null;
 
   if (room === null) {
     return (
@@ -79,7 +87,9 @@ export function JoinRoom() {
         left unused it is eventually forgotten.
       </p>
 
-      <h2>Using Claude?</h2>
+      <h2 className="join-door">
+        <ClaudeMark size={20} /> Using Claude?
+      </h2>
       {claude.lines.map((line) => (
         <p className="step__note" key={line}>
           {line}
@@ -102,7 +112,9 @@ export function JoinRoom() {
         custom connector.
       </p>
 
-      <h2>Using ChatGPT?</h2>
+      <h2 className="join-door">
+        <OpenAiMark size={20} /> Using ChatGPT?
+      </h2>
       {chatgpt.lines.map((line) => (
         <p className="step__note" key={line}>
           {line}

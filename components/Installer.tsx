@@ -14,29 +14,17 @@ import { track } from "../lib/telemetry";
 import { CopyButton } from "./CopyButton";
 import { mintRoom, type OnsGrant } from "../lib/mint-room";
 import { QrCode } from "./QrCode";
+import { ClaudeMark, CursorMark, OpenAiMark } from "./ClientMarks";
 
-/* Generic glyphs, not vendor logos (design round 2: a glyph is a visual
-   affordance for scanning the tabs; the label stays the authority). */
-const TAB_GLYPHS: Record<ClientId, React.ReactNode> = {
-  chatgpt: (
-    <path d="M2.5 3.5h11v7h-6l-3 3v-3h-2z" />
-  ),
-  cursor: (
-    <path d="M4 2l9 5.5-4 1-1.5 4z" />
-  ),
-  "claude-code": (
-    <path d="M2.5 4l4 4-4 4M8.5 12h5" />
-  ),
-  claude: (
-    <path d="M8 2v12M2.8 5l10.4 6M13.2 5L2.8 11" />
-  ),
+/* Real vendor marks since 2026-08-27 (founder reversed design round 2's
+   generic-glyph rule: the logos are what tell a visitor these connections
+   are real). "any" keeps a generic glyph — it names a category, not an app. */
+const TAB_MARKS: Record<ClientId, React.ReactNode> = {
+  chatgpt: <OpenAiMark />,
+  cursor: <CursorMark />,
+  "claude-code": <ClaudeMark />,
+  claude: <ClaudeMark />,
   any: (
-    <path d="M5.5 2v4m5-4v4M3.5 6h9v3a4.5 4.5 0 0 1-9 0zM8 13.5V15" />
-  ),
-};
-
-function TabGlyph({ id }: { id: ClientId }) {
-  return (
     <svg
       className="client-tabs__glyph"
       viewBox="0 0 16 16"
@@ -49,8 +37,14 @@ function TabGlyph({ id }: { id: ClientId }) {
       strokeLinecap="round"
       aria-hidden="true"
     >
-      {TAB_GLYPHS[id]}
+      <path d="M5.5 2v4m5-4v4M3.5 6h9v3a4.5 4.5 0 0 1-9 0zM8 13.5V15" />
     </svg>
+  ),
+};
+
+function TabGlyph({ id }: { id: ClientId }) {
+  return (
+    <>{TAB_MARKS[id]}</>
   );
 }
 
