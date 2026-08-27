@@ -85,12 +85,13 @@ first continuity check.
   are 90-day leases. Handoff is NOT a paid feature: a free room has it too, with
   a smaller mailbox and notes that cannot outlive the room.
 
-## Known limitation
+## Known limitations
 
-Claude on the web cannot currently add a trial room as a connector; ChatGPT,
-Cursor and Claude Code can. Everything works with a signed-in world. The current
-list, dated and maintained by hand, is at
-https://viibe.to/living-memory/known-issues/
+None right now. The entry about Claude on the web not opening a trial room
+came down on 2026-08-23 (the cause was our own edge bot-protection), and the
+installer's Claude tab offers a room since 2026-08-27. What stops working gets
+a dated entry at https://viibe.to/living-memory/known-issues/ and comes down
+when it stops being true.
 
 ## Links
 

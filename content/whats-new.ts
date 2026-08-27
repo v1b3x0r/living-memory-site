@@ -51,6 +51,15 @@ export const TICKER_LIMIT = 4;
 
 export const WHATS_NEW: readonly NewsEntry[] = [
   {
+    merged: "2026-08-26",
+    title: "A room now stays as long as you use it",
+    blurb:
+      "The fixed 24-hour lifetime is gone: a free room stays available while it's used — any successful use keeps it alive — and an inactive room is eventually forgotten, its data deleted with it. Entries below this one still say \"24-hour\"; those numbers were true on their day.",
+    verified: "2026-08-27",
+    verifiedBy:
+      "minted a room and read its grant: kept at least until a date three weeks out, with use extending it; the previous day's deploy check watched an idle room answer 410 'forgotten after a long period of inactivity'",
+  },
+  {
     merged: "2026-08-25",
     title: "Claude on the web can open a free room now",
     blurb:

@@ -578,6 +578,9 @@ test("llms.txt states the tool surface that actually ships", async () => {
   assert.doesNotMatch(body, /handoff is what\nmakes that true/);
   assert.doesNotMatch(body, /where handoff and minted client keys exist/);
   assert.doesNotMatch(body, /no handoff/);
-  assert.match(body, /Claude on the web cannot currently add a trial room/);
+  // Flipped 2026-08-27 (A159 shipped): the limitation came down, and the
+  // negative guard keeps the stale sentence from riding back in.
+  assert.doesNotMatch(body, /cannot currently add a trial room/);
+  assert.match(body, /came down on 2026-08-23/);
   assert.match(body, /no external users as of 2026-08-15/);
 });
