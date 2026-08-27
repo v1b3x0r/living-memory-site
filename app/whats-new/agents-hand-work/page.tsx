@@ -209,6 +209,15 @@ client_revoke("cursor")  → take it back`}</pre>
         itself is not a record of anything.
       </p>
 
+      <p className="policy-page__superseded">
+        <strong>Superseded again — 27 August 2026.</strong> The clamp example
+        in the note above aged out too: since 26 August a room no longer lives
+        a fixed 24 hours. It stays available while it&apos;s used, an idle room
+        is eventually forgotten, and a note in a room is clamped to whatever
+        life the room has left — not to a day. The note stays as written, for
+        the same reason it exists.
+      </p>
+
       <h2>What is true, and what isn&apos;t</h2>
       <p>This is a lab note, not a launch. Being precise about it:</p>
       <ul>
@@ -224,6 +233,13 @@ client_revoke("cursor")  → take it back`}</pre>
           else about Claude works with a world of your own. ChatGPT, Cursor and
           Claude Code all open rooms fine — so a room between any two of{" "}
           <em>those</em> works today.
+          <p className="policy-page__superseded">
+            <strong>Superseded — 27 August 2026.</strong> This one turned out
+            to be ours: an edge bot-protection default was refusing the
+            connection before it reached the server. It came down on 23 August,
+            the known-issues entry with it, and since 27 August the
+            installer&apos;s Claude tab offers a room like every other client.
+          </p>
         </li>
         <li>
           <strong>Cursor cannot use OAuth yet.</strong> Our authorization
