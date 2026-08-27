@@ -122,6 +122,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        {/* WebMCP origin trial for https://viibe.to (Chrome 149–156, expires
+            2026-11-17) — public by design; React 19 hoists it into <head>. */}
+        <meta
+          httpEquiv="origin-trial"
+          content="ApZbpnToxDOfVTXluGA8LOYr8qUZHqO/NGyy87eWjd0GyVOFipaiNqFY61vqhD03TGR7VXf7J/yU4rVPHx22IQUAAABIeyJvcmlnaW4iOiJodHRwczovL3ZpaWJlLnRvOjQ0MyIsImZlYXR1cmUiOiJXZWJNQ1AiLCJleHBpcnkiOjE3OTQ4NzM2MDB9"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
