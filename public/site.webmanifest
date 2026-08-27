@@ -1,0 +1,23 @@
+{
+  "name": "Living Memory",
+  "short_name": "Living Memory",
+  "description": "One world you and your AI agents come and go from — across models, devices and apps.",
+  "start_url": "/living-memory/",
+  "icons": [
+    {
+      "src": "/living-memory/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/living-memory/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#0a2540",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

@@ -1,0 +1,2683 @@
+@import "tailwindcss";
+
+:root {
+  --ocean-980: #071f36;
+  --ocean-950: #0a2540;
+  --ocean-800: #1e4d7a;
+  --ocean-600: #3a7cab;
+  --water-400: #6fb0d5;
+  --water-300: #a7c5de;
+  --water-200: #bfdbeb;
+  --water-100: #e6f1fa;
+  --paper: #ffffff;
+  --paper-blue: #f8fbfe;
+  --ink: #0a2540;
+  --muted: #54718a;
+  --line: rgba(30, 77, 122, 0.18);
+  --line-on-dark: rgba(191, 219, 235, 0.28);
+  --page: min(100% - clamp(2rem, 8vw, 9rem), 90rem);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 84% 12%, rgba(191, 219, 235, 0.42), transparent 26rem),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-blue) 42%, var(--paper) 100%);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  overflow: clip;
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible {
+  outline: 3px solid var(--ocean-600);
+  outline-offset: 4px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--ocean-600);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 780;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+}
+
+/* ══ Shared primitives ═════════════════════════════════════════════════════
+   Used by the landing page, /keep, /oauth and the policy pages alike. */
+
+h1 {
+  margin: 0;
+  color: var(--ocean-950);
+  font-size: clamp(2.6rem, 6.4vw, 4.6rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.03;
+}
+
+h2 {
+  margin: 0;
+  color: var(--ocean-950);
+  font-size: clamp(1.15rem, 2.1vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.text-link {
+  color: var(--ocean-800);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 0.72rem 1.35rem;
+  border: 1px solid transparent;
+  border-radius: 1px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.button--compact {
+  padding: 0.5rem 0.95rem;
+  font-size: 0.82rem;
+}
+
+/* One blue for every primary action on the site — the paid CTA is never a
+   different colour from the free one. */
+.button--primary {
+  background: var(--ocean-800);
+  color: var(--paper);
+}
+
+.button--primary:hover {
+  background: var(--ocean-950);
+}
+
+.button--secondary {
+  background: var(--paper);
+  border-color: var(--line);
+  color: var(--ocean-800);
+}
+
+.button--secondary:hover {
+  border-color: var(--ocean-600);
+}
+
+button.button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Wide content scrolls inside its own box; the page body never scrolls
+   sideways. */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.code {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: var(--ocean-980);
+  color: var(--water-100);
+  border-radius: 1px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.74rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  user-select: all;
+}
+
+.code--inline,
+.code--room {
+  font-size: 0.72rem;
+}
+
+/* ══ Header ════════════════════════════════════════════════════════════════ */
+
+.site-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: clamp(1.5rem, 4vw, 3rem);
+}
+
+.lme-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+}
+
+.lme-mark__icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 42%;
+}
+
+.lme-mark__wordmark {
+  color: var(--ocean-950);
+  font-size: 0.92rem;
+  font-weight: 750;
+  letter-spacing: 0.22em;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 2vw, 1.6rem);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* The phone menu. Hidden on a wide screen, where the nav sits inline. */
+.nav-menu {
+  display: none;
+  position: relative;
+}
+
+.nav-menu > summary {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nav-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Three bars, drawn from one element. */
+.nav-menu__bars,
+.nav-menu__bars::before,
+.nav-menu__bars::after {
+  display: block;
+  width: 1.15rem;
+  height: 2px;
+  background: var(--ocean-950);
+}
+
+.nav-menu__bars {
+  position: relative;
+}
+
+.nav-menu__bars::before,
+.nav-menu__bars::after {
+  position: absolute;
+  left: 0;
+  content: "";
+}
+
+.nav-menu__bars::before {
+  top: -6px;
+}
+
+.nav-menu__bars::after {
+  top: 6px;
+}
+
+.nav-menu[open] > summary {
+  background: var(--water-100);
+}
+
+.nav-menu__panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: grid;
+  gap: 0.15rem;
+  min-width: 14rem;
+  padding: 0.6rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: 0 12px 32px rgba(10, 37, 64, 0.12);
+}
+
+.nav-menu__panel a {
+  padding: 0.6rem 0.5rem;
+  color: var(--ocean-950);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav-menu__panel a:hover {
+  background: var(--water-100);
+}
+
+/* The way back in, set apart from the marketing links above it. */
+.nav-menu__account {
+  margin-top: 0.35rem;
+  padding-top: 0.7rem !important;
+  border-top: 1px solid var(--line);
+}
+
+.nav-menu__panel .button {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* ══ Sections ══════════════════════════════════════════════════════════════
+   Every band is a bordered panel, as drawn. The page is a stack of them. */
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  width: var(--page);
+  margin: 0 auto;
+  padding-bottom: clamp(2rem, 5vw, 4rem);
+  overflow: clip;
+}
+
+.happened,
+.installer,
+.for-what,
+.pricing,
+.issues-strip {
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: var(--paper);
+  padding: clamp(1.5rem, 3.2vw, 2.6rem);
+}
+
+/* The anti-sell is the page's breathing space (round 2): no border, no
+   panel — type sitting directly on the world, which is what the contract
+   ("TYPE ONLY — no icons, cards or borders") asked for all along. The
+   soft wash keeps the words readable over the scene without boxing them. */
+.dont-need {
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 3.2vw, 2.6rem);
+  background: radial-gradient(
+    ellipse 90% 100% at 50% 50%,
+    rgba(255, 255, 255, 0.88),
+    rgba(255, 255, 255, 0.55) 70%,
+    transparent 100%
+  );
+}
+
+/* ══ How a world works ═════════════════════════════════════════════════════
+   The mental-model bridge: three watercolor plates on a washed band (design
+   ruling 2026-08-24 — plates sit on the world, not inside another UI
+   container). The wash follows the paper-wash-as-lighting invariant. */
+
+.how-world {
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 3.2vw, 2.6rem);
+  background: radial-gradient(
+    ellipse 92% 100% at 50% 50%,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.6) 72%,
+    transparent 100%
+  );
+  counter-reset: beat;
+}
+
+.how-world h2 {
+  margin: 0 0 clamp(1.5rem, 3vw, 2.5rem);
+  text-align: center;
+}
+
+.how-world__beats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.how-world__beat {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  counter-increment: beat;
+}
+
+/* Plates are opaque on purpose — they are paintings resting on the world,
+   not windows into it. (multiply here lets the environment bleed through
+   the paper and doubles the scene; do not reintroduce it.) */
+.how-world__plate {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.how-world__beat p {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.65rem;
+  max-width: 20rem;
+  margin: 0;
+  color: var(--ocean-950);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.how-world__beat p::before {
+  content: counter(beat);
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  background: var(--ocean-800);
+  color: var(--paper);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+/* ══ Hero ══════════════════════════════════════════════════════════════════ */
+
+/* Reskin round 1b (founder-approved STRUCTURAL): the hero is a full-bleed
+   shell OUTSIDE the constrained <main> column. Two layers:
+     full-bleed  — the world-scene environment (.hero__bg) spanning the band
+     constrained — .hero__inner, the same `--page` column everything below
+                   uses, holding the overlaid header and the copy
+   The copy lands on the paper fade the asset was drawn with. */
+.hero {
+  position: relative;
+  width: 100%;
+}
+
+/* PAPER WASH AS LIGHTING (design ruling, round 2 polish): text contrast is
+   solved locally with translucent paper washes, never by giving a section an
+   opaque background — where the page must be read the world is washed
+   lighter, where it need not be read the world shows in full.
+
+   The nav's wash: a top gradient scrim, not a navbar background — the
+   watercolor fades where the navigation lives. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 8.5rem;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 31, 54, 0.7),
+    rgba(7, 31, 54, 0)
+  );
+  pointer-events: none;
+}
+
+/* Gemini pass (A158): the night scene used to hit the first white panel as a
+   hard cut. The vignette lets the hero close itself — dark settles at the
+   bottom edge, and the scroll into the paper panels reads as a scene change
+   instead of a snap. */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: clamp(4rem, 9vw, 8rem);
+  background: linear-gradient(180deg, transparent, rgba(7, 31, 54, 0.55));
+  pointer-events: none;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+  width: var(--page);
+  margin: 0 auto;
+  padding-top: clamp(1rem, 2vw, 1.6rem);
+  padding-bottom: clamp(2.5rem, 6vw, 5rem);
+}
+
+/* ══ World environment (round 2) ═══════════════════════════════════════════
+   One fixed full-viewport layer behind everything. The hero is a transparent
+   window onto it; opaque panels scroll over it; the gaps between sections
+   keep revealing the same world. A fixed element rather than
+   background-attachment: fixed, which iOS Safari does not honor. */
+
+.world-env {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.world-env__scene {
+  position: absolute;
+  mix-blend-mode: multiply;
+}
+
+/* One <img>, two dressings: wide styling by default, tall under 900px —
+   the same breakpoint the <picture> swaps crops at. */
+
+/* Wide crop: right-anchored, height-locked to the viewport; the mask hands
+   the left edge over to the copy column. */
+.world-env__scene {
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: auto;
+  /* The table scene (WS2, 2026-08-26) is painted edge to edge. Founder call:
+     the copy's ground is a DARK tint (.world-env__tint), not a paper wash —
+     this site is a night scene, and washing it light fought the whole page.
+     The mask keeps only a whisper so the hard image edge never shows. */
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.85) 0, #000 12%);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.85) 0, #000 12%);
+}
+
+/* The dark tint the hero copy sits on — deep ocean fading into the scene. */
+.world-env__tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(7, 31, 54, 0.88) 0,
+    rgba(7, 31, 54, 0.62) 34%,
+    rgba(7, 31, 54, 0.18) 58%,
+    transparent 74%
+  );
+}
+
+
+
+.hero__copy {
+  display: grid;
+  gap: 1.35rem;
+  justify-items: start;
+  max-width: 40rem;
+  padding-block: clamp(2rem, 5vw, 4.5rem);
+  color: var(--paper);
+}
+
+.hero__copy h1 {
+  color: var(--paper);
+  text-shadow: 0 2px 22px rgba(7, 31, 54, 0.55);
+}
+
+.hero__support {
+  display: grid;
+  gap: 0.28rem;
+  margin: 0;
+  color: var(--water-200);
+  /* Gemini pass (A156): the arches behind can run bright — the shadow is the
+     local overlay, cheaper than a blur and invisible where it isn't needed. */
+  text-shadow: 0 1px 14px rgba(7, 31, 54, 0.85), 0 0 2px rgba(7, 31, 54, 0.6);
+  font-size: clamp(1rem, 1.5vw, 1.12rem);
+  line-height: 1.55;
+}
+
+.hero__cta {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.hero__cta-note {
+  color: var(--water-300);
+  font-size: 0.88rem;
+}
+
+/* WS2: the in-hero room creator. One action, one artifact. */
+.hero-mint {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+
+.hero-mint--granted {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: start;
+  max-width: 34rem;
+}
+
+.hero-mint--granted .code--room {
+  width: 100%;
+}
+
+.hero-mint__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.hero-mint__hint {
+  color: var(--water-200);
+  font-size: 0.85rem;
+}
+
+.hero-mint__hint a {
+  color: var(--water-100);
+}
+
+/* The URL above is a bearer credential; the warning ships WITH it, not only
+   down in the installer a visitor may never reach. (Codex, PR #18 round 3.) */
+.hero-mint__warning {
+  color: var(--water-300);
+  font-size: 0.8rem;
+}
+
+/* The button as an artifact (founder: "middle earth กว่านี้"): a lit pill,
+   moonlight edge, a slow breath of glow — CSS only, no assets. */
+.hero-mint__button {
+  padding: 0.95rem 2.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(191, 219, 235, 0.65);
+  background: linear-gradient(180deg, #2e6399 0%, #1a4979 55%, #123a63 100%);
+  color: var(--water-100);
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 8px rgba(111, 176, 213, 0.55);
+  box-shadow:
+    0 0 22px rgba(111, 176, 213, 0.4),
+    0 0 60px rgba(111, 176, 213, 0.18),
+    inset 0 1px 0 rgba(230, 241, 250, 0.45),
+    inset 0 -6px 14px rgba(7, 31, 54, 0.45);
+  animation: hero-mint-breathe 3.6s ease-in-out infinite;
+}
+
+.hero-mint__button:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3a74ad 0%, #205587 55%, #16436f 100%);
+  box-shadow:
+    0 0 30px rgba(111, 176, 213, 0.6),
+    0 0 80px rgba(111, 176, 213, 0.28),
+    inset 0 1px 0 rgba(230, 241, 250, 0.55),
+    inset 0 -6px 14px rgba(7, 31, 54, 0.45);
+}
+
+@keyframes hero-mint-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 22px rgba(111, 176, 213, 0.4),
+      0 0 60px rgba(111, 176, 213, 0.18),
+      inset 0 1px 0 rgba(230, 241, 250, 0.45),
+      inset 0 -6px 14px rgba(7, 31, 54, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(111, 176, 213, 0.62),
+      0 0 88px rgba(111, 176, 213, 0.3),
+      inset 0 1px 0 rgba(230, 241, 250, 0.5),
+      inset 0 -6px 14px rgba(7, 31, 54, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mint__button {
+    animation: none;
+  }
+}
+
+.trust-row {
+  margin: 0;
+  color: var(--ocean-800);
+  font-size: 0.84rem;
+  font-weight: 550;
+}
+
+/* On the hero's dark tint (WS2), everything that reads goes light — the
+   header overlays the night scene, not paper. Scoped to the hero: the same
+   components keep their paper colors everywhere else. */
+.hero .lme-mark__wordmark {
+  color: var(--paper);
+}
+
+.hero .site-nav .text-link {
+  color: var(--water-200);
+  /* Gemini pass (A157): thin white over the bright arch loses hierarchy. */
+  font-weight: 700;
+  text-shadow: 0 1px 10px rgba(7, 31, 54, 0.75);
+}
+
+.hero .nav-menu > summary {
+  border-color: var(--line-on-dark);
+}
+
+.hero .nav-menu__bars,
+.hero .nav-menu__bars::before,
+.hero .nav-menu__bars::after {
+  background: var(--water-100);
+}
+
+.hero .trust-row {
+  color: var(--water-300);
+}
+
+/* The primary button sits on a dark scene here — give it a lit edge so it
+   doesn't dissolve into the night. */
+.hero .button--primary {
+  border-color: var(--line-on-dark);
+}
+
+
+/* ══ What happened on 15 August ════════════════════════════════════════════ */
+
+.happened__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  margin-top: 1.25rem;
+}
+
+.timeline {
+  padding: 1.15rem 1.3rem;
+  border: 1px solid var(--water-200);
+  background: var(--paper-blue);
+}
+
+.timeline__rows {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline__row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+/* Hairlines between events (reskin round 1) — the card reads as a ledger. */
+.timeline__row + .timeline__row {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--water-200);
+}
+
+.timeline__time {
+  color: var(--ocean-600);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Each actor is a different application from a different company. That is the
+   entire claim, so the names are marked, not buried in a sentence. */
+.pill {
+  padding: 0.14rem 0.55rem;
+  border: 1px solid var(--water-300);
+  background: var(--paper);
+  color: var(--ocean-950);
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.timeline__text {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.timeline__notes {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.9rem 0 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--water-200);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.happened__aside {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+
+.happened__aside p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.happened__lede {
+  color: var(--ocean-950) !important;
+  font-weight: 700;
+}
+
+/* ══ 1 · The installer ═════════════════════════════════════════════════════ */
+
+.installer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.rail-toggle {
+  display: inline-flex;
+  padding: 0.2rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: var(--paper-blue);
+}
+
+.rail-toggle__option {
+  padding: 0.42rem 1.1rem;
+  border: 0;
+  border-radius: 1px;
+  background: transparent;
+  color: var(--ocean-800);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.rail-toggle__option[aria-pressed="true"] {
+  background: var(--ocean-800);
+  color: var(--paper);
+}
+
+.client-tabs {
+  display: flex;
+  gap: clamp(0.5rem, 2vw, 1.6rem);
+  margin: 1.35rem 0 0;
+  padding-bottom: 0.1rem;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.client-tabs__tab {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.55rem 0.15rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.client-tabs__tab[aria-selected="true"] {
+  border-bottom-color: var(--ocean-800);
+  color: var(--ocean-950);
+}
+
+.client-tabs__sublabel {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+/* Round 2: three separate cards rather than one divided band — each step is
+   its own object on the world, the way the mockup draws them. */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  margin-top: 1.5rem;
+}
+
+.step {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.6rem;
+  padding: clamp(1.1rem, 2.2vw, 1.6rem);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+.step__index {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--water-100);
+  color: var(--ocean-800);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.client-tabs__face {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.client-tabs__glyph {
+  flex: none;
+  opacity: 0.75;
+}
+
+.step__second-app {
+  justify-self: center;
+  margin-top: auto;
+  color: var(--ocean-600);
+  opacity: 0.85;
+}
+
+.step h3 {
+  margin: 0;
+  color: var(--ocean-950);
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.step__note,
+.step__caption,
+.step__scan {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.step__caption {
+  font-size: 0.76rem;
+}
+
+.step__scan {
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+}
+
+.step__error {
+  margin: 0;
+  color: #a2372c;
+  font-size: 0.8rem;
+}
+
+.step .code,
+.step pre {
+  width: 100%;
+}
+
+.qr {
+  width: 10.5rem;
+  height: 10.5rem;
+  border-radius: 1px;
+}
+
+/* Before the click there is no room, so there is no code — only the shape it
+   will occupy. Nothing about a room is ever baked into the markup. */
+.qr--placeholder {
+  border: 1px dashed var(--water-300);
+  background: repeating-linear-gradient(
+    45deg,
+    var(--water-100) 0 8px,
+    var(--paper) 8px 16px
+  );
+}
+
+.installer__caption {
+  margin: 1.1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 1px;
+  background: var(--water-100);
+  color: var(--ocean-950);
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-align: center;
+}
+
+.warning-band {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: 1rem 0 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e3c37a;
+  border-radius: 1px;
+  background: #fdf6e4;
+  color: #6b4e12;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.warning-band__mark {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.warning-band__line {
+  display: block;
+}
+
+/* ══ You probably don't need this yet ══════════════════════════════════════
+   The most air on the page. Type only — no icons, no cards, no borders. It is
+   what makes every claim above it credible, so it does not shrink to fit. */
+
+.dont-need {
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 6vw, 5rem);
+  text-align: center;
+}
+
+.dont-need h2 {
+  font-size: clamp(1.6rem, 3.6vw, 2.6rem);
+  color: var(--ocean-800);
+}
+
+.dont-need__columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(2rem, 5vw, 4rem);
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+  text-align: left;
+}
+
+.dont-need__columns p {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  line-height: 1.65;
+}
+
+/* ══ 2 · What it's for ═════════════════════════════════════════════════════ */
+
+.for-what__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 1.4rem;
+}
+
+.for-card {
+  padding: 0 clamp(0.8rem, 1.6vw, 1.4rem);
+  border-right: 1px solid var(--line);
+}
+
+.for-card:first-child {
+  padding-left: 0;
+}
+
+.for-card:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.for-card h3 {
+  margin: 0 0 0.5rem;
+  color: var(--ocean-800);
+  font-size: 0.94rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.for-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+/* ══ 3 · Your own world ════════════════════════════════════════════════════
+   The two blocks are deliberately not parallel in length or shape. */
+
+.pricing__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 1.1rem;
+  margin-top: 1.4rem;
+  align-items: start;
+}
+
+.plan {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.35rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+}
+
+.plan header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.plan h3 {
+  margin: 0;
+  color: var(--ocean-950);
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.plan__price {
+  color: var(--ocean-950);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.plan p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.plan--room {
+  background: var(--paper);
+}
+
+.plan--world {
+  background: var(--paper-blue);
+  border-color: var(--water-200);
+}
+
+.plan--world .button {
+  margin-top: 0.9rem;
+}
+
+/* ══ Tier comparison ═══════════════════════════════════════════════════════
+   A real table. The cards above it are the argument; this is the checking.
+   `compare__scroll` exists for the third column, not for these two — a table
+   that outgrows a phone should scroll itself rather than push the page
+   sideways, and the page must never scroll sideways. */
+.compare__scroll {
+  margin-top: 1.5rem;
+  overflow-x: auto;
+}
+
+.compare {
+  width: 100%;
+  /* Below this the columns compress into unreadable slivers rather than
+     wrapping usefully, so the table stops shrinking and scrolls instead.
+     Measured: at a 340px section the wrapper scrolls and the page does not. */
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.compare th,
+.compare td {
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+/* Flush with the section's own edges, so the table lines up with the cards
+   above it instead of sitting a cell-padding's width inside them. */
+.compare th:first-child,
+.compare td:first-child {
+  padding-left: 0;
+}
+
+.compare th:last-child,
+.compare td:last-child {
+  padding-right: 0;
+}
+
+.compare thead th {
+  color: var(--ocean-950);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* The price sits under the tier name rather than beside it, so the two column
+   headings stay the same width whatever a future tier is called. */
+.compare__price {
+  display: block;
+  color: var(--ink-500, inherit);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.compare tbody th {
+  font-weight: 400;
+}
+
+/* The first two rows are the lifetime rows, and they carry the distinction.
+   The rule under them separates "what is different" from "what is shared". */
+.compare tbody tr:nth-child(2) th,
+.compare tbody tr:nth-child(2) td {
+  border-bottom-width: 2px;
+}
+
+/* Last row is the decision, not a spec — no rule under the end of the table. */
+.compare tbody tr:last-child th,
+.compare tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pricing__assurance {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.pricing__lock {
+  font-size: 0.9rem;
+}
+
+/* ══ Known issues strip ════════════════════════════════════════════════════ */
+
+.issues-strip ul {
+  margin: 0.9rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.issues-strip__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.issues-strip__foot a {
+  color: var(--ocean-800);
+  text-underline-offset: 3px;
+}
+
+/* ══ Footer ════════════════════════════════════════════════════════════════ */
+
+/* The last ground of the page: a stronger translucent paper surface, so the
+   world dissolves back into paper at the end rather than ending at a hard
+   white box. Full-bleed surface; the content inside keeps the --page column. */
+.site-footer {
+  width: 100%;
+  padding: clamp(2rem, 4vw, 3rem) 0 3rem;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.site-footer > * {
+  width: var(--page);
+  margin-inline: auto;
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.site-footer__brand {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+}
+
+.site-footer__brand img {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 42%;
+}
+
+.site-footer__tagline {
+  max-width: 22rem;
+  margin: 0;
+  color: var(--ocean-950);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.site-footer__invariant {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.site-footer__social {
+  color: var(--ocean-800);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+/* The directory badges arrive at different aspect ratios (216x44, 198x62,
+   212x55), so height is normalised and width left to follow. The img rules
+   here are not decoration: `.site-footer__brand img` above squares every image
+   in this column to 2.6rem with a 42% radius, which is right for the mark and
+   would mangle a badge. */
+.site-footer__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.35rem;
+}
+
+.site-footer__badges img {
+  width: auto;
+  height: 2.25rem;
+  border-radius: 0;
+}
+
+.site-footer__column {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+}
+
+.site-footer__column-title {
+  margin: 0 0 0.15rem;
+  color: var(--ocean-950);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.site-footer__column a {
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.site-footer__column a:hover {
+  color: var(--ocean-800);
+  text-decoration: underline;
+}
+
+.site-footer__legal {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+/* ══ Prose tables (known issues) ═══════════════════════════════════════════ */
+
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.matrix th,
+.matrix td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  color: var(--muted);
+}
+
+.matrix thead th {
+  color: var(--ocean-950);
+  font-weight: 700;
+}
+
+.matrix tbody th {
+  color: var(--ocean-950);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.matrix em {
+  font-size: 0.78rem;
+}
+
+.policy-page__lede {
+  color: var(--ocean-950) !important;
+  font-size: 1.05rem !important;
+}
+
+.policy-page__stamp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem !important;
+}
+
+/* A dated post cannot rewrite itself, so a later correction is INSERTED next to
+   what it corrects and has to look inserted — dashed, not the solid rule the
+   post's own blockquotes use for quotations. */
+.policy-page__superseded {
+  margin: 1.5rem 0;
+  padding: 0.9rem 1.1rem;
+  border-left: 3px dashed var(--water-300);
+  background: var(--water-100);
+  font-size: 0.92rem !important;
+}
+
+.policy-page__colophon {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.84rem !important;
+}
+
+.policy-page h3 {
+  margin: 1.8rem 0 0.5rem;
+  color: var(--ocean-950);
+  font-size: 1rem;
+}
+
+.policy-page blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1.1rem;
+  border-left: 3px solid var(--water-300);
+}
+
+.policy-page blockquote p {
+  color: var(--ocean-950);
+}
+
+.policy-page code {
+  padding: 0.1rem 0.3rem;
+  border-radius: 1px;
+  background: var(--water-100);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.86em;
+  word-break: break-word;
+}
+
+.policy-page .code {
+  margin: 1.25rem 0;
+}
+
+/* ══ Narrow screens ════════════════════════════════════════════════════════
+   One column, and the order changes: pricing comes before the feature cards
+   on a phone. `main` is a flex column so the sections can be re-sequenced
+   without moving them in the document. */
+
+@media (max-width: 900px) {
+  .happened__grid,
+  .pricing__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* On a phone the tall crop takes over: scene at the bottom of the
+     viewport, and the hero copy sits at the top, on the paper half the
+     asset was drawn with. The hero reserves a full viewport so the
+     entrance is the whole world, not a strip of it. */
+  .world-env__scene {
+    top: auto;
+    right: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .hero {
+    min-height: 100svh;
+  }
+
+  .hero__copy {
+    padding-block: 1rem 1.5rem;
+  }
+
+  /* Game onboarding (founder call, WS2 night 2): the tall table scene is
+     night edge to edge like the wide one, so the phone hero goes CENTERED
+     light-on-dark — full screen, one button, readable, not poetic. The tint
+     turns vertical: darkest where the copy sits, the scene breathes below. */
+  .world-env__tint {
+    background: linear-gradient(
+      180deg,
+      rgba(7, 31, 54, 0.82) 0,
+      rgba(7, 31, 54, 0.6) 42%,
+      rgba(7, 31, 54, 0.3) 64%,
+      transparent 84%
+    );
+  }
+
+  /* Founder call: the action lives where the thumb lives. The hero is a
+     full-screen column — headline breathes at the top, and everything from
+     the button down sits at the BOTTOM edge of the section. */
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+  }
+
+  .hero__copy {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    margin-inline: auto;
+    width: 100%;
+    padding-bottom: max(1.6rem, env(safe-area-inset-bottom));
+  }
+
+  .hero-mint {
+    margin-top: auto;
+    justify-content: center;
+    padding-top: 2rem;
+  }
+
+  .hero-mint--granted {
+    justify-items: center;
+  }
+
+  .hero-mint__actions {
+    justify-content: center;
+  }
+
+  .hero__cta-note,
+  .trust-row {
+    color: var(--water-300);
+  }
+
+  .steps,
+  .dont-need__columns,
+  .how-world__beats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .how-world__plate {
+    max-width: 24rem;
+  }
+
+  .step {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step:last-child {
+    border-bottom: 0;
+  }
+
+  .for-what__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 0;
+  }
+
+  .for-card:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .for-card:nth-child(odd) {
+    padding-left: 0;
+  }
+
+  .site-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The narrow layout used to re-sequence sections with flex order (proof
+     before installer). WS2 made the DOM order the argument — the room
+     creator leads on EVERY width — so the overrides are gone rather than
+     restated. (Codex, PR #18 round 2.) */
+}
+
+/* The inline nav wrapped onto three lines on a phone and buried the way to
+   sign in. Below this width it becomes the disclosure menu instead. */
+@media (max-width: 860px) {
+  .site-nav {
+    display: none;
+  }
+
+  .nav-menu {
+    display: block;
+  }
+
+  /* Time and pill share a line, the sentence drops beneath them. */
+  .timeline__row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .timeline__row .pill {
+    justify-self: start;
+  }
+
+  .timeline__text {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .site-header {
+    gap: 0.75rem;
+  }
+
+  .for-what__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .for-card {
+    padding: 0 0 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .for-card:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .site-footer__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.policy-shell {
+  width: var(--page);
+  min-height: 72svh;
+  margin: 0 auto;
+  overflow: visible;
+  padding: 2rem 0 5rem;
+}
+
+.policy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.policy-page {
+  max-width: 48rem;
+  margin: clamp(4rem, 9vw, 7rem) auto 0;
+}
+
+.policy-page h1 {
+  max-width: none;
+  margin: 1rem 0 0;
+  font-size: clamp(3rem, 7vw, 5.4rem);
+  line-height: 0.96;
+}
+
+.policy-page h2 {
+  margin: 2.5rem 0 0.6rem;
+  color: var(--ocean-950);
+  font-size: 1.15rem;
+}
+
+.policy-page p,
+.policy-page li {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.policy-page__updated {
+  margin: 1.2rem 0 2.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem !important;
+}
+
+/* ── Storefront pass 2026-08-13 (Claude) — /keep checkout ── */
+
+.keep-shell {
+  max-width: 40rem;
+}
+
+.keep-card {
+  margin-top: 2.5rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.keep-card h1 {
+  margin: 0.35rem 0 1.25rem;
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+}
+
+.keep-plan {
+  margin: 0 0 1.5rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: var(--paper, #fff);
+}
+
+.keep-plan ul {
+  margin: 0.6rem 0;
+  padding-left: 1.2rem;
+}
+
+.keep-plan li {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+}
+
+.keep-plan__trust {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.keep-lede {
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.keep-form label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.keep-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem;
+  font-size: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: #fff;
+}
+
+.keep-form input:focus-visible {
+  outline: 2px solid var(--ocean-600, #1e4d7a);
+  outline-offset: 1px;
+}
+
+.keep-hint {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin: 0.5rem 0 0.9rem;
+}
+
+.keep-form .button,
+.keep-cta {
+  display: inline-flex;
+  justify-content: center;
+  min-height: 44px;
+  align-items: center;
+}
+
+.keep-cta {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+}
+
+.keep-account {
+  font-size: 0.95rem;
+}
+
+.keep-recovery {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.9rem 0;
+  flex-wrap: wrap;
+}
+
+.keep-steps {
+  padding-left: 1.25rem;
+}
+
+.keep-steps li {
+  margin: 0.5rem 0;
+}
+
+.keep-error {
+  color: #b00020;
+}
+
+.keep-debug {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  opacity: 0.6;
+  word-break: break-all;
+}
+
+.keep-legal {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.keep-steps {
+  list-style: decimal;
+}
+
+/* ── Post-checkout return 2026-08-15 — the address is the page ──
+   A payer arrives with one question. The URL outranks every other element,
+   including the storefront heading, which is suppressed in this state. */
+.keep-return__title {
+  margin: 0 0 1rem;
+}
+
+.keep-return__url {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0 0 1.25rem;
+}
+
+.keep-return__url code {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: clamp(1rem, 3.2vw, 1.35rem);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* Tailwind's preflight strips list markers, so every list that wants them says
+   so. This one lost its partner selector when the landing rebuild removed the
+   card it was grouped with. */
+.keep-plan ul,
+.issues-strip ul,
+.policy-page ul {
+  list-style: disc;
+  padding-left: 1.2rem;
+}
+
+/* ── OAuth rail renovation 2026-08-13 (Claude) — login + authorize consent ──
+   One centered card in the existing ocean identity; reuses .button tokens.
+   Appended block, same convention as the storefront pass above. */
+
+.auth-shell {
+  display: grid;
+  width: var(--page);
+  min-height: 72svh;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vh, 4rem) 0;
+  place-items: center;
+}
+
+.auth-card {
+  width: min(100%, 26.5rem);
+  margin: 0 auto;
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 38px rgba(10, 37, 64, 0.08);
+}
+
+.auth-card .eyebrow {
+  margin-bottom: 1rem;
+}
+
+.auth-card h1 {
+  max-width: none;
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.5rem, 3.5vw, 1.85rem);
+  font-weight: 740;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.auth-lede {
+  margin: 0 0 1.4rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.auth-scopes {
+  margin: 0 0 1.6rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--water-200);
+  border-radius: 1px;
+  background: var(--paper-blue);
+  list-style: none;
+}
+
+.auth-scopes li {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.45rem 0;
+  align-items: baseline;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.auth-scopes li::before {
+  flex: 0 0 auto;
+  color: var(--ocean-600);
+  content: "✓";
+  font-weight: 740;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.auth-actions .button {
+  flex: 1;
+}
+
+button.button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button.button:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
+
+.auth-providers {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.auth-providers .button {
+  width: 100%;
+  gap: 0.6rem;
+}
+
+.auth-providers .button svg {
+  flex: 0 0 auto;
+}
+
+.auth-divider {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  margin: 1.1rem 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+  content: "";
+}
+
+.auth-form input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.9rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: #fff;
+  font-size: 1rem;
+}
+
+.auth-form input:focus-visible {
+  outline: 2px solid var(--ocean-600);
+  outline-offset: 1px;
+}
+
+.auth-form .button {
+  width: 100%;
+}
+
+.auth-status {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.auth-status::before {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--ocean-600);
+  box-shadow: 0 0 0 0.3rem rgba(111, 176, 213, 0.18);
+  content: "";
+  margin-right: 0.7rem;
+  animation: auth-pulse 1.6s ease-in-out infinite;
+}
+
+.auth-status--done::before {
+  background: #2e7d4f;
+  box-shadow: 0 0 0 0.3rem rgba(46, 125, 79, 0.14);
+  animation: none;
+}
+
+.auth-error {
+  margin: 0;
+  color: #a2372c;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.auth-error a {
+  color: inherit;
+  font-weight: 640;
+}
+
+.auth-footnote {
+  margin: 1.6rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.auth-footnote a {
+  color: var(--ocean-800);
+  text-underline-offset: 3px;
+}
+
+@keyframes auth-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-status::before {
+    animation: none;
+  }
+}
+
+/* Consent surface: same trust demotion as /keep — no donation CTA. */
+
+/* ── Signed-in avatar chip + account menu ── */
+.avatar {
+  position: relative;
+}
+
+.avatar__chip {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgba(10, 37, 64, 0.16);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 740;
+}
+
+.avatar__chip:focus-visible {
+  outline: 3px solid var(--ocean-600);
+  outline-offset: 3px;
+}
+
+.avatar__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  min-width: 15rem;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: var(--paper);
+  box-shadow: 0 18px 38px rgba(10, 37, 64, 0.14);
+}
+
+.avatar__email {
+  margin: 0;
+  overflow: hidden;
+  padding: 0.55rem 0.7rem 0.65rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar__action {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 1px;
+  background: none;
+  color: var(--ocean-950);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 640;
+  text-align: left;
+}
+
+.avatar__action:hover {
+  background: var(--water-100);
+}
+
+.avatar__action:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* Mini header for the standalone auth pages (login/authorize). */
+.auth-header {
+  display: flex;
+  width: min(100%, 26.5rem);
+  margin: 0 auto 1.1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-shell__inner {
+  width: 100%;
+}
+
+.policy-header__side {
+  display: flex;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+/* Compact mobile navigation (review P2): logo row + one intentional nav row
+   instead of unrestricted flex wrapping. */
+@media (max-width: 640px) {
+  .site-header {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+
+  .site-nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.4rem 0.8rem;
+  }
+
+  .site-nav .text-link {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+}
+
+/* Delete my world — the signed-in account control. Deliberately quiet until
+   armed: a destructive action should be findable, not tempting. */
+.keep-danger {
+  margin: 2rem 0 0;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  background: var(--paper, #fff);
+}
+
+.keep-danger h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+
+.keep-danger p {
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+}
+
+.keep-danger__confirm label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.keep-danger__confirm input {
+  width: 100%;
+  margin-bottom: 0.7rem;
+}
+
+.keep-danger__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* The only red on the page, and only once the word is typed. */
+.button--danger {
+  background: #b00020;
+  border-color: #b00020;
+  color: #fff;
+}
+
+.button--danger:hover:not(:disabled) {
+  background: #8c0019;
+  border-color: #8c0019;
+}
+
+.keep-danger__fine {
+  margin: 0.9rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.keep-danger--done {
+  border-color: var(--ocean-600, var(--line));
+}
+
+/* /keep — active-subscriber state. No price, no checkout: someone who already
+   pays being shown payment concludes their payment failed. */
+.keep-active__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+}
+
+.keep-active__billing {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.keep-nosub {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Hard separation between anything priced and the delete control. */
+.keep-divider {
+  margin: 2rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.keep-danger__separation {
+  font-size: 0.9rem;
+}
+
+/* ══ The strip ═════════════════════════════════════════════════════════════
+   A 2000s marquee, on purpose and only here. Everything below the strip keeps
+   the quiet ocean palette; this one band is allowed to be loud, because its
+   job is to be noticed in the first half-second and say "something is running
+   behind this page". Loud is the message, not a mood.
+
+   It is also the only animated chrome on the site, so all of the motion rules
+   live in this one block: it pauses on hover and on focus, and
+   prefers-reduced-motion (further down, plus the global animation kill) turns
+   it into a plain line you can scroll. */
+
+.ticker {
+  --ticker-height: 2.4rem;
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: stretch;
+  min-height: var(--ticker-height);
+  overflow: hidden;
+  border-bottom: 1px solid rgba(6, 20, 36, 0.55);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 42%),
+    linear-gradient(90deg, var(--ocean-980) 0%, var(--ocean-800) 50%, var(--ocean-980) 100%);
+  color: var(--water-100);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* The disco: one wide rainbow sheen sliding under the text, kept far enough
+   down in opacity that the words stay the brightest thing in the band. */
+.ticker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #ff2fb9 0%,
+    #ffb02f 18%,
+    #6bff8f 36%,
+    #2fd9ff 54%,
+    #8b5cff 72%,
+    #ff2fb9 90%,
+    #ffb02f 100%
+  );
+  background-size: 220% 100%;
+  opacity: 0.62;
+  filter: saturate(1.5);
+  mix-blend-mode: screen;
+  animation: ticker-disco 9s linear infinite;
+  pointer-events: none;
+}
+
+/* Bevel plus the shimmer. Two hairlines is what made a 2000s bar look pressed
+   out of chrome; the diagonal stripes sliding the other way are what made it
+   look like the chrome was catching a light. Opposing directions matter — two
+   layers travelling together read as one texture, and the effect disappears. */
+.ticker::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 -1px 0 rgba(6, 20, 36, 0.6);
+  /* The scrim. Turning the rainbow up put white text over yellow and mint,
+     which is unreadable — so the colour stays loud and this layer puts the
+     floor back under the type. Loud is the brief; illegible is not. */
+  background-color: rgba(7, 22, 40, 0.42);
+  background-image: repeating-linear-gradient(
+    114deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0) 18px,
+    rgba(255, 255, 255, 0.16) 22px,
+    rgba(255, 255, 255, 0.03) 26px,
+    rgba(255, 255, 255, 0) 34px
+  );
+  background-size: 190% 100%;
+  animation: ticker-shimmer 5.5s linear infinite;
+  pointer-events: none;
+}
+
+.ticker__badge {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  flex: 0 0 auto;
+  padding: 0 0.8rem;
+  border-right: 1px solid rgba(6, 20, 36, 0.5);
+  background: linear-gradient(180deg, #ff6ecb 0%, #ff2fb9 52%, #c4108a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(120, 8, 82, 0.7);
+  white-space: nowrap;
+}
+
+.ticker__badge:hover {
+  background: linear-gradient(180deg, #ff8ed8 0%, #ff45c4 52%, #d51a9b 100%);
+}
+
+.ticker__blink {
+  animation: ticker-blink 1.1s steps(1, end) infinite;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.ticker__viewport {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  /* Fade both ends so text enters and leaves instead of being guillotined. */
+  mask-image: linear-gradient(90deg, transparent 0, #000 2.5rem, #000 calc(100% - 2.5rem), transparent 100%);
+}
+
+.ticker__track {
+  display: flex;
+  flex: 0 0 auto;
+  width: max-content;
+  animation: ticker-scroll 42s linear infinite;
+  will-change: transform;
+}
+
+/* A headline you cannot finish reading is worse than no headline. */
+.ticker:hover .ticker__track,
+.ticker:focus-within .ticker__track {
+  animation-play-state: paused;
+}
+
+.ticker__run {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.ticker__star {
+  padding: 0 0.55rem;
+  color: #ffe27a;
+  font-size: 0.78rem;
+  text-shadow: 0 0 6px rgba(255, 226, 122, 0.85);
+}
+
+/* The ribbon. A pressed plastic tag with a date tab riveted to the front —
+   the shape is doing real work, not decoration: it tells you where one change
+   stops and the next starts while the whole strip is moving. */
+.ticker__chip {
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(7, 22, 40, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 1px 2px rgba(6, 20, 36, 0.55);
+}
+
+.ticker__date {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.62rem;
+  gap: 0.36rem;
+  background: linear-gradient(180deg, #a8ffe0 0%, #56e6b4 55%, #24bf8d 100%);
+  color: #05261c;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Quieter than the date it qualifies, but present: the date is a merge date,
+   and on a strip headed "New" an unlabelled one reads as "available since". */
+.ticker__date-label {
+  font-size: 0.86em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.62;
+}
+
+.ticker__title {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.72rem;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  /* The band under this text is now loud, so the text needs its own floor. */
+  text-shadow:
+    0 1px 0 rgba(6, 20, 36, 0.95),
+    0 0 10px rgba(6, 20, 36, 0.75);
+}
+
+.ticker__all {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0 0.85rem;
+  border-left: 1px solid rgba(6, 20, 36, 0.5);
+  background: rgba(6, 20, 36, 0.45);
+  color: var(--water-100);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ticker__all:hover {
+  background: rgba(6, 20, 36, 0.75);
+  color: #fff;
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* Exactly one run. The second copy has arrived where the first began. */
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes ticker-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes ticker-shimmer {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    background-position: 190% 0;
+  }
+}
+
+@keyframes ticker-disco {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: -220% 50%;
+  }
+}
+
+/* Motion off: the global rule already stops every animation, which would leave
+   the crawl frozen at its first frame with the rest unreachable. So the track
+   stops being a crawl and becomes a line you can scroll, the duplicate run is
+   removed so nothing is read twice, and the sheen holds still instead of
+   sitting at whatever hue it stopped on. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__viewport {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .ticker__track {
+    transform: none;
+  }
+
+  .ticker__track > [aria-hidden="true"] {
+    display: none;
+  }
+
+  .ticker::before {
+    opacity: 0.3;
+    background-position: 0% 50%;
+  }
+
+  .ticker::after {
+    background-image: none;
+  }
+}
+
+/* ══ The feed at /whats-new/ ═══════════════════════════════════════════════ */
+
+.feed {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feed__entry {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.feed__entry:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.feed__date {
+  display: block;
+  color: var(--ocean-600);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.feed__title {
+  margin: 0.4rem 0 0;
+}
+
+.feed__blurb {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+}
+
+.feed__verified {
+  margin: 0.6rem 0 0;
+  color: var(--ocean-600);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+/* FeedbackBox — one-tap problem signal (GTM pass 2026-08-24, advisor A144-A146) */
+.feedback-box {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--paper);
+  padding: 1rem 1.1rem;
+  max-width: 34rem;
+}
+.feedback-box__prompt {
+  margin: 0 0 0.6rem;
+  color: var(--ink);
+}
+.feedback-box__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.feedback-box__chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-blue);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+.feedback-box__chip:hover {
+  border-color: var(--ocean-600);
+}
+.feedback-box__chip--on {
+  background: var(--ocean-800);
+  border-color: var(--ocean-800);
+  color: var(--paper);
+}
+.feedback-box__detail {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.feedback-box__text,
+.feedback-box__email {
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: var(--paper);
+  width: 100%;
+}
+.feedback-box__send-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.feedback-box__send {
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--ocean-800);
+  color: var(--paper);
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.feedback-box__alt,
+.feedback-box__thanks {
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.feedback-box__thanks {
+  margin: 0;
+  color: var(--ink);
+}
+.feedback-box__opener-row {
+  margin: 1.4rem 0 0;
+  text-align: center;
+}
+.feedback-box__opener {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.feedback-box__opener:hover {
+  color: var(--ink);
+}

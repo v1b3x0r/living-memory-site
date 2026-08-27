@@ -1,0 +1,4 @@
+interface:
+  display_name: "Living Memory"
+  short_description: "Guide an agent through durable continuity"
+  default_prompt: "Use $living-memory to connect my memory world and guide my first continuity check."

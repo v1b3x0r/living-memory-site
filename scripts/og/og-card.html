@@ -1,0 +1,54 @@
+<!doctype html><meta charset="utf-8">
+<style>
+  @import url('');
+  * { box-sizing: border-box; margin: 0; }
+  :root{--ocean-950:#0a2540;--ocean-800:#1e4d7a;--ocean-600:#3a7cab;--water-100:#e6f1fa;--muted:#54718a;--paper:#fff;}
+  html,body{width:1200px;height:630px;}
+  body{
+    display:grid;grid-template-rows:1fr auto;
+    font-family:Inter,-apple-system,"Helvetica Neue",sans-serif;
+    color:var(--ocean-950);
+    background:
+      radial-gradient(circle at 86% 34%, rgba(191,219,235,.5), transparent 46%),
+      linear-gradient(180deg,#fff 0%, #f8fbfe 60%, #fff 100%);
+  }
+  .top{display:grid;grid-template-columns:1.08fr .92fr;align-items:center;padding:44px 56px 0;}
+  .mark{display:flex;align-items:center;gap:14px;margin-bottom:34px;}
+  .mark img{width:44px;height:44px;border-radius:42%;}
+  .mark span{font-size:19px;font-weight:750;letter-spacing:.22em;}
+  h1{font-size:60px;line-height:1.02;letter-spacing:-.035em;font-weight:800;}
+  .sub{margin-top:22px;display:grid;gap:6px;color:var(--muted);font-size:22px;line-height:1.4;}
+  .trust{margin-top:30px;color:var(--ocean-800);font-size:18px;font-weight:600;}
+  .art{position:relative;display:grid;place-items:center;}
+  .art img{width:420px;height:auto;mix-blend-mode:multiply;
+    -webkit-mask-image:radial-gradient(ellipse 62% 62% at 50% 50%,#000 0 42%,rgba(0,0,0,.82) 62%,rgba(0,0,0,.35) 80%,transparent 100%);}
+  .strip{display:flex;align-items:center;justify-content:space-between;gap:40px;
+    padding:22px 56px;background:var(--ocean-950);color:#fff;}
+  .strip .url{font-size:26px;font-weight:750;letter-spacing:-.01em;}
+  .strip .url small{display:block;font-size:15px;font-weight:500;opacity:.72;letter-spacing:0;margin-top:4px;}
+  .facts{display:flex;gap:38px;}
+  .fact{max-width:220px;}
+  .fact b{display:block;font-size:16px;font-weight:700;margin-bottom:3px;}
+  .fact span{font-size:14px;line-height:1.4;opacity:.74;}
+</style>
+<div class="top">
+  <div>
+    <div class="mark"><img src="whale.webp"><span>LIVING MEMORY</span></div>
+    <h1>One memory<br>your agents share.</h1>
+    <div class="sub">
+      <span>Across models, devices, and apps.</span>
+      <span>Tell one agent something today.</span>
+      <span>Ask a different one about it tomorrow.</span>
+    </div>
+    <div class="trust">One world, many agents · Private by default · Open source engine</div>
+  </div>
+  <div class="art"><img src="whale.webp"></div>
+</div>
+<div class="strip">
+  <div class="url">viibe.to/living-memory<small>Open a room — free. No signup.</small></div>
+  <div class="facts">
+    <div class="fact"><b>Zero external users.</b><span>A working system, not an adopted one.</span></div>
+    <div class="fact"><b>Rooms stay while used.</b><span>Left inactive, they are forgotten.</span></div>
+    <div class="fact"><b>Apache-2.0</b><span>v1b3x0r/living-memory-engine</span></div>
+  </div>
+</div>
