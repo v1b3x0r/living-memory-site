@@ -604,6 +604,12 @@ main {
   font-size: 0.8rem;
 }
 
+/* Tier 1 mobile onboarding card — hidden on desktop by default; the hero's
+   mobile breakpoint (900px, below) reveals it. Two actions, never more. */
+.mobile-setup {
+  display: none;
+}
+
 /* The button as an artifact (founder: "middle earth กว่านี้"): a lit pill,
    moonlight edge, a slow breath of glow — CSS only, no assets. */
 .hero-mint__button {
@@ -1519,6 +1525,52 @@ main {
 
   .hero-mint--granted {
     justify-items: center;
+  }
+
+  .mobile-setup {
+    display: grid;
+    gap: 0.55rem;
+    justify-items: center;
+    margin-top: 0.9rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(191, 219, 235, 0.28);
+    border-radius: 14px;
+    background: rgba(10, 37, 64, 0.55);
+    max-width: 34rem;
+  }
+
+  .mobile-setup__title {
+    color: var(--water-100);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .mobile-setup__body {
+    color: var(--water-200);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .mobile-setup__actions {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* On the hero's dark ground the paper secondary reads as a real button;
+     primary stays reserved for the copy action. */
+  .mobile-setup__open {
+    text-decoration: none;
+    background: var(--paper);
+    border-color: var(--line);
+    color: var(--ocean-800);
+  }
+
+  .mobile-setup__fallback {
+    color: var(--water-300);
+    font-size: 0.78rem;
+    text-align: center;
   }
 
   .hero-mint__actions {

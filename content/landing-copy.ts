@@ -44,6 +44,20 @@ export const landing = {
     ],
     cta: "Open a room — free",
     ctaNote: "No signup. No credit card.",
+    // Tier 1 mobile onboarding card (2026-08-27, onboarding-deeplink handoff).
+    // The claim is the founder-confirmed route (advisor A165): set up once in
+    // any browser, then the connection keeps working inside the phone app.
+    // "Claude" is named because the deep link goes there; other clients keep
+    // the installer below. Probe result: the modal opens, nothing prefills —
+    // so the card teaches copy → open → paste, with a hand-navigation
+    // fallback because the link rides undocumented internals.
+    mobileSetup: {
+      title: "On your phone? One minute of setup.",
+      body: "Copy the room URL, open Claude's connector form, and paste it in. After that, the room works inside your Claude app — no computer needed.",
+      copyLabel: "Copy the room URL",
+      openLabel: "Open Claude's connector form",
+      fallback: "If the form doesn't open: claude.ai → Settings → Connectors → Add custom connector.",
+    },
     trust: [
       "One world, many agents",
       "Private by default",

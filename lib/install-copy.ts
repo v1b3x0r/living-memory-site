@@ -32,6 +32,17 @@ export const SERVER_NAMES = {
 /** Shown before a room exists. Never a real token — see the mint flow. */
 export const ROOM_URL_PLACEHOLDER = "https://lme.viibe.to/t/<token>/mcp";
 
+/**
+ * Deep link into Claude's "Add custom connector" modal (probed 2026-08-27).
+ * FRAGILE BY NATURE: the ?modal= param and the #settings hash are undocumented
+ * internals — the connectors page already moved once (settings → customize).
+ * No prefill param exists (all candidates probed and the bundle scanned), so
+ * the user still pastes the room URL themselves. Any UI using this link must
+ * carry a hand-navigation fallback line next to it.
+ */
+export const CLAUDE_CONNECTOR_DEEPLINK =
+  "https://claude.ai/new?modal=add-custom-connector#settings/customize-connectors";
+
 export const LOCAL_INSTALL_COMMAND = `npx ${NPM_PACKAGE}`;
 
 /**

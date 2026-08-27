@@ -5,6 +5,7 @@ import { landing } from "../content/landing-copy";
 import { mintRoom, type OnsGrant } from "../lib/mint-room";
 import { track } from "../lib/telemetry";
 import { CopyButton } from "./CopyButton";
+import { MobileSetupCard } from "./MobileSetupCard";
 
 /**
  * WS2 (2026-08-26): the hero IS the room creator — press the button, get the
@@ -84,6 +85,9 @@ export function HeroMint() {
           Anyone holding this URL can read and write this room — don&apos;t
           post or screenshot it.
         </div>
+        {/* Mobile-only (CSS): the copy → open → paste shortcut. Fed from THIS
+            grant state, so there is no second listener and no second truth. */}
+        <MobileSetupCard url={grant.url} />
       </div>
     );
   }
