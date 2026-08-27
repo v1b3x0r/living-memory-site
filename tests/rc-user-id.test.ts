@@ -35,3 +35,21 @@ test("checkout only produces the LIVE production link", () => {
     "https://pay.rev.cat/gesrgyeedsavgktj/oauth_member-live-abc",
   );
 });
+
+// GOLDEN VECTORS — the cross-repo contract with the server (lme-remote
+// test/rc-user-id-parity.test.ts pins the identical list against its
+// resolveSubject truth). Since the repos split on 2026-08-27 this list IS the
+// parity guard: change it in both repos together or not at all.
+test("matches the server's golden vectors exactly", () => {
+  const goldens: ReadonlyArray<[string, string]> = [
+    ["member-test-1d633786-5a86-4095-9bce-923725aa3ac5", "oauth_member-test-1d633786-5a86-4095-9bce-923725aa3ac5"],
+    ["member-live-11285995-bd1c-41be-8885-1ca0ca4d449f", "oauth_member-live-11285995-bd1c-41be-8885-1ca0ca4d449f"],
+    ["auth0|alice", "oauth_auth0_7c_alice"],
+    ["user:with:colons", "oauth_user_3a_with_3a_colons"],
+    ["a b/c.d@e", "oauth_a_20_b_2f_c_2e_d_40_e"],
+    ["ผู้ใช้", "oauth__e1c__e39__e49__e43__e0a__e49_"],
+  ];
+  for (const [sub, expected] of goldens) {
+    assert.equal(rcUserIdFromSub(sub), expected);
+  }
+});
