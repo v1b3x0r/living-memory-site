@@ -638,3 +638,19 @@ test("the policy pages send a subscriber to the account page first, not to email
   // Cancelling and deleting stay different things on the page that says so.
   assert.match(terms, /Cancelling stops the billing\. It does not delete anything/);
 });
+
+// llms.txt is crawled by Glama and PulseMCP, so a heading that contradicts the
+// body is repeated by machines nobody controls. It said "None right now" while
+// the same file already described the capacity gate — a summariser quoting the
+// heading would report a service with no known limitations.
+test("llms.txt does not claim it has no limitations while describing one", async () => {
+  const body = await (await render({}, `${BASE_PATH}/llms.txt`)).text();
+
+  assert.match(body, /## Known limitations/);
+  assert.doesNotMatch(body, /## Known limitations\s+None right now/);
+  // The live one, named in the section a reader is told to trust.
+  assert.match(body, /refuses reads and clean-up as well as writes/);
+  assert.match(body, /429/);
+  // The resolved entry stays, dated, rather than being deleted.
+  assert.match(body, /came down on 2026-08-23/);
+});

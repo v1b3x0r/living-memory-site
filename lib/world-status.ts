@@ -22,7 +22,8 @@ import { WORLD_STATUS_URL } from "./install-copy";
 export interface Billing {
   store: string;
   status: string;
-  autoRenews: boolean;
+  /** true = renews · false = will not renew · null = RevenueCat said something we do not recognise. */
+  autoRenews: boolean | null;
   currentPeriodEndsAt: string | null;
   /** RevenueCat's hosted portal for this subscription. Absent for promotional grants. */
   managementUrl: string | null;

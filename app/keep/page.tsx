@@ -81,6 +81,12 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
   // "cancelled", which is the most alarming sentence it is capable of.
   const purchased = billing?.store === "rc_billing";
   const renews = purchased && billing?.autoRenews === true;
+  // The third state. RevenueCat's renewal vocabulary is open-ended, so the
+  // server reports an unrecognised value as null rather than as "will not
+  // renew" — and the page has to stay quiet about renewal instead of picking
+  // one of the two confident sentences. Saying nothing is the correct answer
+  // when we do not know; the portal below always knows.
+  const renewalUnknown = purchased && billing?.autoRenews == null;
   // Rendered in the reader's own locale and timezone: this date is the day
   // money moves, and an ISO string in UTC is not a date most people can act on.
   const until = billing?.currentPeriodEndsAt
@@ -112,14 +118,22 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
               <dd>
                 {!purchased
                   ? "Granted — not a paid subscription"
-                  : renews
-                    ? "Active — renews automatically"
-                    : "Cancelled — your access runs to the end of the paid period"}
+                  : renewalUnknown
+                    ? "Active — open your payment page below for what happens next"
+                    : renews
+                      ? "Active — renews automatically"
+                      : "Cancelled — your access runs to the end of the paid period"}
               </dd>
             </div>
             {until && (
               <div>
-                <dt>{renews ? "Next payment" : "Access until"}</dt>
+                <dt>
+                  {renews
+                    ? "Next payment"
+                    : renewalUnknown
+                      ? "Current period ends"
+                      : "Access until"}
+                </dt>
                 <dd>{until}</dd>
               </div>
             )}
@@ -158,10 +172,16 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
           )}
         </>
       ) : (
+        // `null` is one value covering two situations — a world granted rather
+        // than sold, and a billing lookup we could not complete — so this text
+        // has to be true in both. The old wording asserted an outage and sent a
+        // comped user hunting for a receipt email that was never sent.
         <p className="keep-billing__fine">
-          We could not reach billing just now. Your world is unaffected. Manage or
-          cancel from the link in your receipt email, or write to{" "}
-          <a href="mailto:support@viibe.to">support@viibe.to</a> and we will do it.
+          We have no payment details to show for this world right now — either
+          nothing was charged for it, or we could not reach billing a
+          moment ago. Your world is unaffected either way. If you do have a
+          subscription, the link in your receipt email manages it; otherwise
+          write to <a href="mailto:support@viibe.to">support@viibe.to</a>.
         </p>
       )}
     </section>
@@ -344,6 +364,12 @@ export default function KeepPage() {
               Activation can take up to a minute. Still locked out after a few
               minutes? <a href={`${BASE_PATH}/support#billing`}>Billing support</a>.
             </p>
+            {/* Someone who just paid is the likeliest person to want out again,
+                and this branch used to end here — the self-service control was
+                a sign-out and a sign-in away. Rendered only once entitlement
+                has actually landed: a billing panel shown during the
+                activation minute would report nothing and read as a failure. */}
+            {status?.entitled === true && <BillingPanel billing={status.billing} />}
           </div>
         ) : !isInitialized ? (
           <p aria-live="polite">Loading…</p>

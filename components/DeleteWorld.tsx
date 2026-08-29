@@ -103,8 +103,8 @@ export function DeleteWorld({ memories = null, hasBilling = false }: DeleteWorld
         {/* Said at the moment it matters most: they have just pressed an
             irreversible button and the next question is "what now". */}
         <p>
-          Your endpoint URL has not changed. Sign in again whenever you like and a
-          new, empty world opens at that same address.
+          Your endpoint URL has not changed. For as long as your subscription is
+          running, signing in again opens a new, empty world at that same address.
         </p>
         <p className="keep-danger__fine">
           Removed from the live service immediately. Infrastructure backups of the server
@@ -137,9 +137,11 @@ export function DeleteWorld({ memories = null, hasBilling = false }: DeleteWorld
           client afterwards — purge removes the world, and the next sign-in
           rebuilds an empty one at the same path. */}
       <p className="keep-danger__separation">
-        Your endpoint URL stays the same. Sign in again afterwards and a new,
-        empty world opens at that same address — you do not buy anything again,
-        and nothing needs re-pasting into ChatGPT, Claude, or any other client.
+        Your endpoint URL stays the same. While your subscription is still
+        running, signing in again opens a new, empty world at that same address —
+        nothing needs re-pasting into ChatGPT, Claude, or any other client. Once
+        the paid period ends, hosted access lapses like any other month, and a
+        world opens again when a subscription does.
       </p>
 
       {phase === "idle" && (

@@ -92,11 +92,21 @@ first continuity check.
 
 ## Known limitations
 
-None right now. The entry about Claude on the web not opening a trial room
+A free room that reaches either of its bounds — the size budget or the daily
+operation budget — currently refuses reads and clean-up as well as writes, so
+a full room answers 429 to memory_search and memory_forget too, not only to
+memory_add. Posted 2026-08-29. The daily budget clears at midnight UTC; a room
+stuck on the size bound cannot be emptied from inside, so mail us. This section
+said "None right now" while that was already true and documented above, which
+is worse than saying nothing: a summariser quoting this heading reports a
+service with no known limitations.
+
+The entry about Claude on the web not opening a trial room
 came down on 2026-08-23 (the cause was our own edge bot-protection), and the
-installer's Claude tab offers a room since 2026-08-27. What stops working gets
-a dated entry at https://viibe.to/living-memory/known-issues/ and comes down
-when it stops being true.
+installer's
+Claude tab offers a room since 2026-08-27. What stops working gets a dated
+entry at https://viibe.to/living-memory/known-issues/ and comes down when it
+stops being true.
 
 ## Links
 
