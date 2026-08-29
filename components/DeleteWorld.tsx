@@ -100,6 +100,12 @@ export function DeleteWorld({ memories = null, hasBilling = false }: DeleteWorld
           {result.credentialsRevoked === 1 ? "agent key" : "agent keys"}. Any agent still
           pointed at this world now gets nothing back.
         </p>
+        {/* Said at the moment it matters most: they have just pressed an
+            irreversible button and the next question is "what now". */}
+        <p>
+          Your endpoint URL has not changed. Sign in again whenever you like and a
+          new, empty world opens at that same address.
+        </p>
         <p className="keep-danger__fine">
           Removed from the live service immediately. Infrastructure backups of the server
           expire within 7 days; nobody can restore your world from them on request.
@@ -125,6 +131,15 @@ export function DeleteWorld({ memories = null, hasBilling = false }: DeleteWorld
       <p className="keep-danger__separation">
         This is about your stored data, not your subscription; deleting does not cancel
         billing, and cancelling does not delete anything.{billingHere}
+      </p>
+      {/* The fact that makes this button safe to press, and it was never said:
+          the address does not change. Nothing has to be reconfigured in any
+          client afterwards — purge removes the world, and the next sign-in
+          rebuilds an empty one at the same path. */}
+      <p className="keep-danger__separation">
+        Your endpoint URL stays the same. Sign in again afterwards and a new,
+        empty world opens at that same address — you do not buy anything again,
+        and nothing needs re-pasting into ChatGPT, Claude, or any other client.
       </p>
 
       {phase === "idle" && (

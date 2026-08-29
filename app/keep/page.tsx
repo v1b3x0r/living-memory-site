@@ -74,7 +74,13 @@ function PlanSummary() {
  * to yesterday's behaviour; never to a blank panel or a dead button.
  */
 function BillingPanel({ billing }: { billing: Billing | null }) {
-  const renews = billing?.autoRenews === true;
+  // A world that was granted rather than bought has no renewal, no next
+  // payment, and nothing to cancel — and RevenueCat still reports it with the
+  // vocabulary of a paid plan (the founder's own grant carries will_not_renew).
+  // Rendered as-is, the page tells someone who never paid that they are
+  // "cancelled", which is the most alarming sentence it is capable of.
+  const purchased = billing?.store === "rc_billing";
+  const renews = purchased && billing?.autoRenews === true;
   // Rendered in the reader's own locale and timezone: this date is the day
   // money moves, and an ISO string in UTC is not a date most people can act on.
   const until = billing?.currentPeriodEndsAt
@@ -93,16 +99,22 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
           <dl className="keep-billing__facts">
             <div>
               <dt>Plan</dt>
-              <dd>Living Memory — a world of your own, $9 / month</dd>
+              <dd>
+                {purchased
+                  ? "Living Memory — a world of your own, $9 / month"
+                  : "Living Memory — a world of your own, granted"}
+              </dd>
             </div>
             <div>
               <dt>Status</dt>
               {/* "Cancelled" has to say what the customer still HAS, or the
                   word reads as "your world is gone" — which it is not. */}
               <dd>
-                {renews
-                  ? "Active — renews automatically"
-                  : "Cancelled — your access runs to the end of the paid period"}
+                {!purchased
+                  ? "Granted — not a paid subscription"
+                  : renews
+                    ? "Active — renews automatically"
+                    : "Cancelled — your access runs to the end of the paid period"}
               </dd>
             </div>
             {until && (
@@ -122,17 +134,25 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
                 Manage or cancel subscription →
               </a>
               <p className="keep-billing__fine">
-                Opens your payment page, where you can see receipts, change your
-                card, or cancel. Cancelling stops the billing. It does not delete
-                your world.
+                Opens RevenueCat, our payment provider. It emails you a sign-in
+                link first to check it is you; after that you can see past
+                payments, download receipts, change your card, or cancel.
+                Cancelling stops the billing. It does not delete your world.
+              </p>
+              {/* The statement line, next to the card question rather than buried
+                  in the terms: an unrecognised name on a bank statement is how a
+                  chargeback starts, and the customer is the one who has to
+                  recognise it months later. */}
+              <p className="keep-billing__fine">
+                Charges appear on your statement as <strong>LIVING-MEMORY</strong>.
               </p>
             </>
           ) : (
             // A world granted rather than bought has no Stripe subscription and
             // so no portal. Saying so beats a button that goes nowhere.
             <p className="keep-billing__fine">
-              This world was granted rather than purchased, so there is no payment
-              page to manage. Questions:{" "}
+              There is no payment page for this world — nothing was charged, so
+              there is no card, no receipt, and nothing to cancel. Questions:{" "}
               <a href="mailto:support@viibe.to">support@viibe.to</a>.
             </p>
           )}
@@ -346,6 +366,16 @@ export default function KeepPage() {
                 <p>
                   Sign in with this same account from any client that supports it.
                 </p>
+                {/* Which world is this? It was answerable only before paying: the
+                    signed-in line lived in the checkout branch, so the moment
+                    someone subscribed the page stopped telling them whose world
+                    they were looking at — with a delete button further down. */}
+                {accountEmail && (
+                  <p className="keep-account" aria-label="Signed-in account">
+                    This world belongs to <strong>{accountEmail}</strong>. Signing
+                    in with a different address opens a different world.
+                  </p>
+                )}
                 <BillingPanel billing={status?.billing ?? null} />
               </section>
             ) : (
