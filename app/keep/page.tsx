@@ -34,6 +34,12 @@ import { identify, track } from "../../lib/telemetry";
 
 const SESSION_MINUTES = 60;
 
+// Waiting out RevenueCat activation after checkout: about 75 seconds of looking,
+// which covers the "up to a minute" the page promises with room to spare, then
+// we stop rather than poll a customer's browser indefinitely.
+const ACTIVATION_POLL_MS = 5_000;
+const ACTIVATION_ATTEMPTS = 15;
+
 // A discovery token is single-use: guard against double effect invocation.
 let authenticateStarted = false;
 
@@ -293,14 +299,36 @@ export default function KeepPage() {
 
   // One read once signed in. Until it answers, the page shows no billing claim at
   // all — an unknown state renders as silence, never as "you have not paid".
+  //
+  // ONE READ IS NOT ENOUGH IMMEDIATELY AFTER CHECKOUT. RevenueCat activation can
+  // take up to a minute — the page says so a few lines below — so a customer who
+  // lands here from payment gets `entitled: false` on the first read and, with a
+  // single fetch, nothing ever changes it. Everything gated on entitlement then
+  // stays hidden through exactly the minute it is most wanted, including the
+  // billing controls this page just gained. So while `?purchased=1` is on the URL
+  // and entitlement has not landed, re-read on a fixed interval, and stop: at the
+  // answer we are waiting for, or after ATTEMPTS, because a page that polls
+  // forever is a page that never admits something went wrong. The activation
+  // notice below is what a customer sees if the budget runs out.
   useEffect(() => {
     if (!session) return;
     const jwt = stytch.session.getTokens()?.session_jwt;
     if (!jwt) return;
     let live = true;
-    fetchWorldStatus(jwt).then((s) => { if (live) setStatus(s); });
-    return () => { live = false; };
-  }, [session, stytch]);
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const read = async () => {
+      const s = await fetchWorldStatus(jwt);
+      if (!live) return;
+      setStatus(s);
+      const waiting = purchased && s?.entitled !== true && ++tries < ACTIVATION_ATTEMPTS;
+      if (waiting) timer = setTimeout(read, ACTIVATION_POLL_MS);
+    };
+    void read();
+
+    return () => { live = false; if (timer) clearTimeout(timer); };
+  }, [session, stytch, purchased]);
 
   return (
     <main id="main-content" className="policy-shell keep-shell">
