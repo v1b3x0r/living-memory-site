@@ -24,7 +24,7 @@ import { CopyButton } from "../../components/CopyButton";
 import { LmeMark } from "../../components/LmeMark";
 import { AuthAvatar } from "../../components/AuthAvatar";
 import { DeleteWorld } from "../../components/DeleteWorld";
-import { fetchWorldStatus, type WorldStatus } from "../../lib/world-status";
+import { fetchWorldStatus, type Billing, type WorldStatus } from "../../lib/world-status";
 import {
   GitHubMark,
   GoogleMark,
@@ -57,6 +57,94 @@ function PlanSummary() {
         <a href={`${BASE_PATH}/support#billing`}>Cancellation &amp; support</a>
       </p>
     </aside>
+  );
+}
+
+/**
+ * The billing panel — the answer to six questions a paying human should never
+ * have to email anyone to ask: am I paying, how much, when again, where are my
+ * receipts, how do I change payment, and how do I stop.
+ *
+ * Only the last three need a destination, and RevenueCat already hosts one, so
+ * this renders facts plus a link rather than a billing system of our own.
+ *
+ * THE FALLBACK IS THE OLD WORDING, NOT AN EMPTY BOX. `billing` is null for a
+ * comped world and for an unreachable RevenueCat alike, and in both cases the
+ * receipt-email sentence that shipped before this panel is still true. Degrade
+ * to yesterday's behaviour; never to a blank panel or a dead button.
+ */
+function BillingPanel({ billing }: { billing: Billing | null }) {
+  const renews = billing?.autoRenews === true;
+  // Rendered in the reader's own locale and timezone: this date is the day
+  // money moves, and an ISO string in UTC is not a date most people can act on.
+  const until = billing?.currentPeriodEndsAt
+    ? new Date(billing.currentPeriodEndsAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
+
+  return (
+    <section className="keep-billing" aria-labelledby="keep-billing-title">
+      <h2 id="keep-billing-title">Billing</h2>
+      {billing ? (
+        <>
+          <dl className="keep-billing__facts">
+            <div>
+              <dt>Plan</dt>
+              <dd>Living Memory — a world of your own, $9 / month</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              {/* "Cancelled" has to say what the customer still HAS, or the
+                  word reads as "your world is gone" — which it is not. */}
+              <dd>
+                {renews
+                  ? "Active — renews automatically"
+                  : "Cancelled — your access runs to the end of the paid period"}
+              </dd>
+            </div>
+            {until && (
+              <div>
+                <dt>{renews ? "Next payment" : "Access until"}</dt>
+                <dd>{until}</dd>
+              </div>
+            )}
+          </dl>
+          {billing.managementUrl ? (
+            <>
+              <a
+                className="button button--secondary"
+                href={billing.managementUrl}
+                onClick={() => track("billing_portal_opened")}
+              >
+                Manage or cancel subscription →
+              </a>
+              <p className="keep-billing__fine">
+                Opens your payment page, where you can see receipts, change your
+                card, or cancel. Cancelling stops the billing. It does not delete
+                your world.
+              </p>
+            </>
+          ) : (
+            // A world granted rather than bought has no Stripe subscription and
+            // so no portal. Saying so beats a button that goes nowhere.
+            <p className="keep-billing__fine">
+              This world was granted rather than purchased, so there is no payment
+              page to manage. Questions:{" "}
+              <a href="mailto:support@viibe.to">support@viibe.to</a>.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="keep-billing__fine">
+          We could not reach billing just now. Your world is unaffected. Manage or
+          cancel from the link in your receipt email, or write to{" "}
+          <a href="mailto:support@viibe.to">support@viibe.to</a> and we will do it.
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -258,12 +346,7 @@ export default function KeepPage() {
                 <p>
                   Sign in with this same account from any client that supports it.
                 </p>
-                <p className="keep-active__billing">
-                  Billing is managed through your receipt email. To cancel or update
-                  payment, use the link in it — or write to{" "}
-                  <a href="mailto:support@viibe.to">support@viibe.to</a> and we
-                  will do it.
-                </p>
+                <BillingPanel billing={status?.billing ?? null} />
               </section>
             ) : (
               <>
@@ -305,7 +388,10 @@ export default function KeepPage() {
             {/* Its own section, visually separated from anything priced: the delete
                 control must never read as the remedy for a billing problem. */}
             <hr className="keep-divider" />
-            <DeleteWorld memories={status?.world?.memories ?? null} />
+            <DeleteWorld
+              memories={status?.world?.memories ?? null}
+              hasBilling={status?.entitled === true}
+            />
           </>
         ) : (
           <>

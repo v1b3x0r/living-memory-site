@@ -199,8 +199,14 @@ test("gives a phone a menu, and both sizes a way to sign in", async () => {
   // A paying visitor could not find the way back in on a phone: the inline nav
   // wrapped and there was no account entry anywhere.
   assert.match(html, /<details class="nav-menu">/);
-  assert.match(html, /Sign in — your world/);
-  assert.match(html, new RegExp(`href="${BASE_PATH}/keep/">Sign in<`));
+  // Both sizes now say it. The desktop link used to read a bare "Sign in",
+  // which is the wrong word for the page that is also the account and billing
+  // surface — the only way back for someone who already pays.
+  assert.doesNotMatch(html, new RegExp(`href="${BASE_PATH}/keep/">Sign in<`));
+  // Desktop nav and the phone menu both carry it (the RSC payload repeats the
+  // markup, so count only that it is present on both, not how many times).
+  assert.match(html, /class="text-link" href="[^"]*\/keep\/">Sign in — your world</);
+  assert.match(html, /class="nav-menu__account" href="[^"]*\/keep\/">Sign in — your world</);
   // The menu opens without JavaScript, so it works before hydration.
   assert.match(html, /<summary aria-label="Menu">/);
 });
@@ -603,4 +609,28 @@ test("llms.txt states the tool surface that actually ships", async () => {
   assert.doesNotMatch(body, /cannot currently add a trial room/);
   assert.match(body, /came down on 2026-08-23/);
   assert.match(body, /no external users as of 2026-08-15/);
+});
+
+// Self-service billing. The promise "cancel anytime" is only true if there is
+// somewhere on the site to do it; before this, both policy pages sent a paying
+// customer hunting for an old email or into the founder's inbox.
+test("the policy pages send a subscriber to the account page first, not to email", async () => {
+  const terms = await (await render({}, `${BASE_PATH}/terms/`)).text();
+  const support = await (await render({}, `${BASE_PATH}/support/`)).text();
+
+  // On-site cancellation is named, and named BEFORE the receipt-email route.
+  assert.match(terms, /Cancel anytime from the Billing section of your account page/);
+  assert.ok(
+    terms.indexOf("Billing section of your account page") <
+      terms.indexOf("receipt email"),
+    "terms must offer the on-site path before the receipt email",
+  );
+  assert.match(support, /Manage or cancel subscription<\/strong> under Billing/);
+
+  // Email stays, as a fallback for someone locked out — never as the only way.
+  assert.match(support, /Locked out of the account page\?/);
+  assert.doesNotMatch(support, /Manage or\s+cancel from the subscription link in your RevenueCat receipt email\./);
+
+  // Cancelling and deleting stay different things on the page that says so.
+  assert.match(terms, /Cancelling stops the billing\. It does not delete anything/);
 });

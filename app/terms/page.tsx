@@ -37,8 +37,9 @@ export default function TermsPage() {
       <p>
         Living Memory is a paid subscription: US$9 per month, billed monthly in advance through
         RevenueCat Web Billing with Stripe as the payment processor. It renews automatically each
-        month until cancelled. Cancel anytime from the subscription-management link in your RevenueCat
-        receipt email, or by emailing <a href="mailto:support@viibe.to">support@viibe.to</a> —
+        month until cancelled. Cancel anytime from the Billing section of your account page after
+        signing in, from the subscription-management link in your RevenueCat receipt email, or by
+        emailing <a href="mailto:support@viibe.to">support@viibe.to</a> —
         cancellation takes effect at the end of the current paid period, and access runs until then.
         If a renewal payment fails, hosted access lapses until payment succeeds; your stored memory is
         not deleted by a failed payment. After checkout, entitlement activation on the memory server
