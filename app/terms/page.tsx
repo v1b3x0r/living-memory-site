@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <PolicyPage eyebrow="SERVICE TERMS" title="Terms of use" updated="August 16, 2026">
+    <PolicyPage eyebrow="SERVICE TERMS" title="Terms of use" updated="August 29, 2026">
       <p>
         These terms cover the Living Memory Engine hosted service. By using it, you agree to use it
         lawfully and only with data you have the right to provide.

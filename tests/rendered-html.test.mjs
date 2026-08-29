@@ -654,3 +654,13 @@ test("llms.txt does not claim it has no limitations while describing one", async
   // The resolved entry stays, dated, rather than being deleted.
   assert.match(body, /came down on 2026-08-23/);
 });
+
+// A policy page's date is not decoration: it is how someone establishes which
+// version of the cancellation terms they agreed to. Both pages changed their
+// billing instructions on 2026-08-29 while still displaying older dates.
+test("policy pages date themselves to the day their billing terms changed", async () => {
+  for (const path of ["terms", "support"]) {
+    const html = await (await render({}, `${BASE_PATH}/${path}/`)).text();
+    assert.match(html, /August 29, 2026/, `${path} must carry the date its billing wording changed`);
+  }
+});
