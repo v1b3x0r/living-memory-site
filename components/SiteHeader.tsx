@@ -36,8 +36,11 @@ export function SiteHeader() {
             {link.label}
           </a>
         ))}
+        {/* Not bare "Sign in": this link is also the account page, and it is the
+            only way back for someone who already pays. The mobile menu has said
+            so since it was written; the desktop nav was the one left behind. */}
         <a className="text-link" href={KEEP_PATH}>
-          Sign in
+          Sign in — your world
         </a>
         <a className="button button--primary button--compact" href="#installer">
           {landing.nav.cta}

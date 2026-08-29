@@ -17,7 +17,7 @@ export default function KnownIssuesPage() {
     <PolicyPage
       eyebrow="WHAT DOESN'T WORK"
       title="Known issues"
-      updated="August 25, 2026"
+      updated="August 29, 2026"
     >
       <p className="policy-page__lede">
         <strong>What doesn&apos;t work right now, and what to do instead.</strong>
@@ -27,11 +27,31 @@ export default function KnownIssuesPage() {
         and we take them down when they stop being true.
       </p>
 
-      <h2>Nothing is on this page right now</h2>
+      <h2>A free room that reaches a limit blocks recovery too</h2>
+      <p className="policy-page__stamp">
+        <strong>Posted 2026-08-29</strong>
+      </p>
       <p>
-        Every limitation we knew about has stopped being true, so the entries
-        came down. If you hit something we should know about, the address below
-        still works.
+        A free room is metered. When it reaches one of its bounds, the limit is
+        applied to the whole connection before any tool runs — so reading and
+        removing memories are refused along with writing them. That is the part
+        we consider a bug rather than a limit: at the moment you most need to
+        look at what is in a room, or clear something out of it, you cannot.
+      </p>
+      <p>
+        There are two bounds and they do not behave the same way. The daily
+        operation budget clears by itself at midnight UTC, and a search counts
+        against it because it embeds. Total capacity does not clear by itself,
+        because the one action that would free space is blocked by the same
+        gate.
+      </p>
+      <p>
+        The message the server returns today suggests running the open-source
+        server instead. That is not a recovery path for a room you already have
+        — it is a different install, and it will not bring back what is in the
+        room. If this happens to yours, mail us at the address below before you
+        do anything else; the room is intact, it is the door that is shut. We
+        are working on letting recovery through while writes stay blocked.
       </p>
 
       <h3>Recently resolved</h3>

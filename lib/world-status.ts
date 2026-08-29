@@ -9,8 +9,29 @@
 // that sells a second one.
 import { WORLD_STATUS_URL } from "./install-copy";
 
+/**
+ * What the page may say about the caller's money. Mirrors BillingFacts in
+ * lme-remote/src/entitlement.ts; every field comes from RevenueCat and none is
+ * stored here.
+ *
+ * null means "no answer", which is a THIRD state, not a synonym for "not
+ * subscribed" — an unreachable billing API and a comped world both land here,
+ * and both must fall back to the receipt-email wording rather than render an
+ * empty or invented panel.
+ */
+export interface Billing {
+  store: string;
+  status: string;
+  /** true = renews · false = will not renew · null = RevenueCat said something we do not recognise. */
+  autoRenews: boolean | null;
+  currentPeriodEndsAt: string | null;
+  /** RevenueCat's hosted portal for this subscription. Absent for promotional grants. */
+  managementUrl: string | null;
+}
+
 export interface WorldStatus {
   entitled: boolean | null;
+  billing: Billing | null;
   world: { memories: number } | null;
 }
 

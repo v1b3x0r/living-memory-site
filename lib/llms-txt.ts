@@ -20,8 +20,10 @@ inactive rooms are eventually forgotten, and a room does not migrate into
 a paid world.
 A **world** is the same place that does not end: what was left in it is still
 there days later, and the timeline keeps walking whether or not anyone is in it.
-A world is $9/month and is tied to a sign-in. The difference is lifetime, not
-capability — a room can do everything a world can, while it stays in use.
+A world is $9/month and is tied to a sign-in. The difference is lifetime and
+budget, not capability: a room has every tool a world has, and is metered —
+about 16 memories in total, 300 operations each day, and 8 live handoff
+notes. A world is unmetered.
 
 ## The tools, and which surface has them
 
@@ -73,9 +75,12 @@ first continuity check.
   it goes unused; any successful use keeps it alive. Once forgotten it answers
   410, and its data is then deleted — memories and handoff notes alike. Nothing
   belonging to a room survives it. Rate-limited per address.
-- A room differs from a world by how long it lasts, not by what it can do: both
-  share memory, hand work between agents, and record which route each note
-  arrived through. A world is what does not end.
+- A room differs from a world by how long it lasts and how much it holds, not by
+  which tools it has: both share memory, hand work between agents, and record
+  which route each note arrived through. A room is metered — roughly 16
+  memories in total, 300 operations each day (a search counts, it embeds) and 8
+  live notes — and answers 429 once a bound is reached. A world is what does not
+  end, and is unmetered.
 
 ## A world of your own
 
@@ -87,11 +92,21 @@ first continuity check.
 
 ## Known limitations
 
-None right now. The entry about Claude on the web not opening a trial room
+A free room that reaches either of its bounds — the size budget or the daily
+operation budget — currently refuses reads and clean-up as well as writes, so
+a full room answers 429 to memory_search and memory_forget too, not only to
+memory_add. Posted 2026-08-29. The daily budget clears at midnight UTC; a room
+stuck on the size bound cannot be emptied from inside, so mail us. This section
+said "None right now" while that was already true and documented above, which
+is worse than saying nothing: a summariser quoting this heading reports a
+service with no known limitations.
+
+The entry about Claude on the web not opening a trial room
 came down on 2026-08-23 (the cause was our own edge bot-protection), and the
-installer's Claude tab offers a room since 2026-08-27. What stops working gets
-a dated entry at https://viibe.to/living-memory/known-issues/ and comes down
-when it stops being true.
+installer's
+Claude tab offers a room since 2026-08-27. What stops working gets a dated
+entry at https://viibe.to/living-memory/known-issues/ and comes down when it
+stops being true.
 
 ## Links
 

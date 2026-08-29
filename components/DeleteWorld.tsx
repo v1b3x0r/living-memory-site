@@ -25,9 +25,21 @@ const CONFIRM_WORD = "DELETE";
 export interface DeleteWorldProps {
   /** Memory count from the status read; null when unknown — the copy adapts rather than guesses. */
   memories?: number | null;
+  /**
+   * Whether a Billing section is on the page above. It is not, for a visitor
+   * with no subscription — and an anchor to a section that was never rendered
+   * scrolls nowhere, which is worse than the plain sentence it replaced.
+   */
+  hasBilling?: boolean;
 }
 
-export function DeleteWorld({ memories = null }: DeleteWorldProps) {
+export function DeleteWorld({ memories = null, hasBilling = false }: DeleteWorldProps) {
+  const billingHere = hasBilling ? (
+    <>
+      {" "}
+      To stop paying, use <a href="#keep-billing-title">Billing</a> above.
+    </>
+  ) : null;
   const stytch = useStytchB2BClient();
   const [phase, setPhase] = useState<Phase>("idle");
   const [typed, setTyped] = useState("");
@@ -88,12 +100,20 @@ export function DeleteWorld({ memories = null }: DeleteWorldProps) {
           {result.credentialsRevoked === 1 ? "agent key" : "agent keys"}. Any agent still
           pointed at this world now gets nothing back.
         </p>
+        {/* Said at the moment it matters most: they have just pressed an
+            irreversible button and the next question is "what now". */}
+        <p>
+          Your endpoint URL has not changed. For as long as your subscription is
+          running, signing in again opens a new, empty world at that same address.
+        </p>
         <p className="keep-danger__fine">
           Removed from the live service immediately. Infrastructure backups of the server
           expire within 7 days; nobody can restore your world from them on request.
           Your sign-in and any billing records are separate — see{" "}
           <a href="/living-memory/privacy/">Privacy</a>. If you have an active
-          subscription, cancel it separately so you are not billed again.
+          subscription it is still running, and cancelling it is a separate step —
+          sign in again and use Billing on this page so you are not billed for a
+          world you no longer have.
         </p>
       </section>
     );
@@ -110,7 +130,18 @@ export function DeleteWorld({ memories = null }: DeleteWorldProps) {
           who thinks their payment failed and an irreversible click. */}
       <p className="keep-danger__separation">
         This is about your stored data, not your subscription; deleting does not cancel
-        billing, and cancelling does not delete anything.
+        billing, and cancelling does not delete anything.{billingHere}
+      </p>
+      {/* The fact that makes this button safe to press, and it was never said:
+          the address does not change. Nothing has to be reconfigured in any
+          client afterwards — purge removes the world, and the next sign-in
+          rebuilds an empty one at the same path. */}
+      <p className="keep-danger__separation">
+        Your endpoint URL stays the same. While your subscription is still
+        running, signing in again opens a new, empty world at that same address —
+        nothing needs re-pasting into ChatGPT, Claude, or any other client. Once
+        the paid period ends, hosted access lapses like any other month, and a
+        world opens again when a subscription does.
       </p>
 
       {phase === "idle" && (

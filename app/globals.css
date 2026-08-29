@@ -2300,6 +2300,52 @@ button.button:disabled {
   color: var(--muted);
 }
 
+/* Billing. Deliberately the plainest block on the site: the personality lives
+   in the world, and the part that handles money should be boring enough that a
+   stranger recognises it without reading. */
+.keep-billing {
+  margin: 1.4rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+
+.keep-billing h2 {
+  margin: 0 0 0.7rem;
+  font-size: 1rem;
+}
+
+.keep-billing__facts {
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.keep-billing__facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  align-items: baseline;
+}
+
+.keep-billing__facts dt {
+  min-width: 8.5rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.keep-billing__facts dd {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.keep-billing__fine {
+  margin: 0.7rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .keep-nosub {
   margin: 0 0 0.6rem;
   font-size: 0.85rem;

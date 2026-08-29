@@ -24,7 +24,7 @@ import { CopyButton } from "../../components/CopyButton";
 import { LmeMark } from "../../components/LmeMark";
 import { AuthAvatar } from "../../components/AuthAvatar";
 import { DeleteWorld } from "../../components/DeleteWorld";
-import { fetchWorldStatus, type WorldStatus } from "../../lib/world-status";
+import { fetchWorldStatus, type Billing, type WorldStatus } from "../../lib/world-status";
 import {
   GitHubMark,
   GoogleMark,
@@ -33,6 +33,12 @@ import {
 import { identify, track } from "../../lib/telemetry";
 
 const SESSION_MINUTES = 60;
+
+// Waiting out RevenueCat activation after checkout: about 75 seconds of looking,
+// which covers the "up to a minute" the page promises with room to spare, then
+// we stop rather than poll a customer's browser indefinitely.
+const ACTIVATION_POLL_MS = 5_000;
+const ACTIVATION_ATTEMPTS = 15;
 
 // A discovery token is single-use: guard against double effect invocation.
 let authenticateStarted = false;
@@ -57,6 +63,134 @@ function PlanSummary() {
         <a href={`${BASE_PATH}/support#billing`}>Cancellation &amp; support</a>
       </p>
     </aside>
+  );
+}
+
+/**
+ * The billing panel — the answer to six questions a paying human should never
+ * have to email anyone to ask: am I paying, how much, when again, where are my
+ * receipts, how do I change payment, and how do I stop.
+ *
+ * Only the last three need a destination, and RevenueCat already hosts one, so
+ * this renders facts plus a link rather than a billing system of our own.
+ *
+ * THE FALLBACK IS THE OLD WORDING, NOT AN EMPTY BOX. `billing` is null for a
+ * comped world and for an unreachable RevenueCat alike, and in both cases the
+ * receipt-email sentence that shipped before this panel is still true. Degrade
+ * to yesterday's behaviour; never to a blank panel or a dead button.
+ */
+function BillingPanel({ billing }: { billing: Billing | null }) {
+  // A world that was granted rather than bought has no renewal, no next
+  // payment, and nothing to cancel — and RevenueCat still reports it with the
+  // vocabulary of a paid plan (the founder's own grant carries will_not_renew).
+  // Rendered as-is, the page tells someone who never paid that they are
+  // "cancelled", which is the most alarming sentence it is capable of.
+  const purchased = billing?.store === "rc_billing";
+  const renews = purchased && billing?.autoRenews === true;
+  // The third state. RevenueCat's renewal vocabulary is open-ended, so the
+  // server reports an unrecognised value as null rather than as "will not
+  // renew" — and the page has to stay quiet about renewal instead of picking
+  // one of the two confident sentences. Saying nothing is the correct answer
+  // when we do not know; the portal below always knows.
+  const renewalUnknown = purchased && billing?.autoRenews == null;
+  // Rendered in the reader's own locale and timezone: this date is the day
+  // money moves, and an ISO string in UTC is not a date most people can act on.
+  const until = billing?.currentPeriodEndsAt
+    ? new Date(billing.currentPeriodEndsAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
+
+  return (
+    <section className="keep-billing" aria-labelledby="keep-billing-title">
+      <h2 id="keep-billing-title">Billing</h2>
+      {billing ? (
+        <>
+          <dl className="keep-billing__facts">
+            <div>
+              <dt>Plan</dt>
+              <dd>
+                {purchased
+                  ? "Living Memory — a world of your own, $9 / month"
+                  : "Living Memory — a world of your own, granted"}
+              </dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              {/* "Cancelled" has to say what the customer still HAS, or the
+                  word reads as "your world is gone" — which it is not. */}
+              <dd>
+                {!purchased
+                  ? "Granted — not a paid subscription"
+                  : renewalUnknown
+                    ? "Active — open your payment page below for what happens next"
+                    : renews
+                      ? "Active — renews automatically"
+                      : "Cancelled — your access runs to the end of the paid period"}
+              </dd>
+            </div>
+            {until && (
+              <div>
+                <dt>
+                  {renews
+                    ? "Next payment"
+                    : renewalUnknown
+                      ? "Current period ends"
+                      : "Access until"}
+                </dt>
+                <dd>{until}</dd>
+              </div>
+            )}
+          </dl>
+          {billing.managementUrl ? (
+            <>
+              <a
+                className="button button--secondary"
+                href={billing.managementUrl}
+                onClick={() => track("billing_portal_opened")}
+              >
+                Manage or cancel subscription →
+              </a>
+              <p className="keep-billing__fine">
+                Opens RevenueCat, our payment provider. It emails you a sign-in
+                link first to check it is you; after that you can see past
+                payments, download receipts, change your card, or cancel.
+                Cancelling stops the billing. It does not delete your world.
+              </p>
+              {/* The statement line, next to the card question rather than buried
+                  in the terms: an unrecognised name on a bank statement is how a
+                  chargeback starts, and the customer is the one who has to
+                  recognise it months later. */}
+              <p className="keep-billing__fine">
+                Charges appear on your statement as <strong>LIVING-MEMORY</strong>.
+              </p>
+            </>
+          ) : (
+            // A world granted rather than bought has no Stripe subscription and
+            // so no portal. Saying so beats a button that goes nowhere.
+            <p className="keep-billing__fine">
+              There is no payment page for this world — nothing was charged, so
+              there is no card, no receipt, and nothing to cancel. Questions:{" "}
+              <a href="mailto:support@viibe.to">support@viibe.to</a>.
+            </p>
+          )}
+        </>
+      ) : (
+        // `null` is one value covering two situations — a world granted rather
+        // than sold, and a billing lookup we could not complete — so this text
+        // has to be true in both. The old wording asserted an outage and sent a
+        // comped user hunting for a receipt email that was never sent.
+        <p className="keep-billing__fine">
+          We have no payment details to show for this world right now — either
+          nothing was charged for it, or we could not reach billing a
+          moment ago. Your world is unaffected either way. If you do have a
+          subscription, the link in your receipt email manages it; otherwise
+          write to <a href="mailto:support@viibe.to">support@viibe.to</a>.
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -165,14 +299,36 @@ export default function KeepPage() {
 
   // One read once signed in. Until it answers, the page shows no billing claim at
   // all — an unknown state renders as silence, never as "you have not paid".
+  //
+  // ONE READ IS NOT ENOUGH IMMEDIATELY AFTER CHECKOUT. RevenueCat activation can
+  // take up to a minute — the page says so a few lines below — so a customer who
+  // lands here from payment gets `entitled: false` on the first read and, with a
+  // single fetch, nothing ever changes it. Everything gated on entitlement then
+  // stays hidden through exactly the minute it is most wanted, including the
+  // billing controls this page just gained. So while `?purchased=1` is on the URL
+  // and entitlement has not landed, re-read on a fixed interval, and stop: at the
+  // answer we are waiting for, or after ATTEMPTS, because a page that polls
+  // forever is a page that never admits something went wrong. The activation
+  // notice below is what a customer sees if the budget runs out.
   useEffect(() => {
     if (!session) return;
     const jwt = stytch.session.getTokens()?.session_jwt;
     if (!jwt) return;
     let live = true;
-    fetchWorldStatus(jwt).then((s) => { if (live) setStatus(s); });
-    return () => { live = false; };
-  }, [session, stytch]);
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const read = async () => {
+      const s = await fetchWorldStatus(jwt);
+      if (!live) return;
+      setStatus(s);
+      const waiting = purchased && s?.entitled !== true && ++tries < ACTIVATION_ATTEMPTS;
+      if (waiting) timer = setTimeout(read, ACTIVATION_POLL_MS);
+    };
+    void read();
+
+    return () => { live = false; if (timer) clearTimeout(timer); };
+  }, [session, stytch, purchased]);
 
   return (
     <main id="main-content" className="policy-shell keep-shell">
@@ -236,6 +392,12 @@ export default function KeepPage() {
               Activation can take up to a minute. Still locked out after a few
               minutes? <a href={`${BASE_PATH}/support#billing`}>Billing support</a>.
             </p>
+            {/* Someone who just paid is the likeliest person to want out again,
+                and this branch used to end here — the self-service control was
+                a sign-out and a sign-in away. Rendered only once entitlement
+                has actually landed: a billing panel shown during the
+                activation minute would report nothing and read as a failure. */}
+            {status?.entitled === true && <BillingPanel billing={status.billing} />}
           </div>
         ) : !isInitialized ? (
           <p aria-live="polite">Loading…</p>
@@ -258,12 +420,17 @@ export default function KeepPage() {
                 <p>
                   Sign in with this same account from any client that supports it.
                 </p>
-                <p className="keep-active__billing">
-                  Billing is managed through your receipt email. To cancel or update
-                  payment, use the link in it — or write to{" "}
-                  <a href="mailto:support@viibe.to">support@viibe.to</a> and we
-                  will do it.
-                </p>
+                {/* Which world is this? It was answerable only before paying: the
+                    signed-in line lived in the checkout branch, so the moment
+                    someone subscribed the page stopped telling them whose world
+                    they were looking at — with a delete button further down. */}
+                {accountEmail && (
+                  <p className="keep-account" aria-label="Signed-in account">
+                    This world belongs to <strong>{accountEmail}</strong>. Signing
+                    in with a different address opens a different world.
+                  </p>
+                )}
+                <BillingPanel billing={status?.billing ?? null} />
               </section>
             ) : (
               <>
@@ -305,7 +472,10 @@ export default function KeepPage() {
             {/* Its own section, visually separated from anything priced: the delete
                 control must never read as the remedy for a billing problem. */}
             <hr className="keep-divider" />
-            <DeleteWorld memories={status?.world?.memories ?? null} />
+            <DeleteWorld
+              memories={status?.world?.memories ?? null}
+              hasBilling={status?.entitled === true}
+            />
           </>
         ) : (
           <>

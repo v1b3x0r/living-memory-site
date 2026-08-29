@@ -199,8 +199,14 @@ test("gives a phone a menu, and both sizes a way to sign in", async () => {
   // A paying visitor could not find the way back in on a phone: the inline nav
   // wrapped and there was no account entry anywhere.
   assert.match(html, /<details class="nav-menu">/);
-  assert.match(html, /Sign in — your world/);
-  assert.match(html, new RegExp(`href="${BASE_PATH}/keep/">Sign in<`));
+  // Both sizes now say it. The desktop link used to read a bare "Sign in",
+  // which is the wrong word for the page that is also the account and billing
+  // surface — the only way back for someone who already pays.
+  assert.doesNotMatch(html, new RegExp(`href="${BASE_PATH}/keep/">Sign in<`));
+  // Desktop nav and the phone menu both carry it (the RSC payload repeats the
+  // markup, so count only that it is present on both, not how many times).
+  assert.match(html, /class="text-link" href="[^"]*\/keep\/">Sign in — your world</);
+  assert.match(html, /class="nav-menu__account" href="[^"]*\/keep\/">Sign in — your world</);
   // The menu opens without JavaScript, so it works before hydration.
   assert.match(html, /<summary aria-label="Menu">/);
 });
@@ -291,7 +297,16 @@ test("prices a room and a world as different kinds of thing", async () => {
 
   assert.match(html, /Room \(free\)/);
   assert.match(html, /\$0/);
-  assert.match(html, /Lasts while you use it\./);
+  assert.match(html, /Stays 21 days from your last visit\./);
+
+  // The free tier is metered, and the page says the number a reader actually
+  // hits. Pinned because "about 16 memories" is the one line standing between
+  // a visitor and filling a room they cannot recover (2026-08-29).
+  // The two bounds must stay distinguishable: 16 is a lifetime cap, 300 is a
+  // daily one. Written as one comma list they read as "16 a day" — a real
+  // misreading, by NotebookLM, on 2026-08-29.
+  assert.match(html, /About 16 memories in total, and 300 operations each day/);
+  assert.doesNotMatch(html, /16 memories, and 300 operations a day/);
   assert.match(html, /World \(paid\)/);
   assert.match(html, /\$9 \/ month/);
   assert.match(html, /A place to put things down\./);
@@ -368,10 +383,13 @@ test("says on the landing page what does not work", async () => {
   const html = await (await render()).text();
 
   assert.match(html, /Known issues/);
-  // Nothing is broken right now, and the strip must not claim otherwise —
-  // the last entry (Claude web + rooms) resolved 2026-08-23.
-  assert.match(html, /Nothing open right now\./);
-  assert.match(html, /resolved on 2026-08-23/);
+  // Something IS broken as of 2026-08-29 — a free room at a limit refuses reads
+  // and clean-up, not just writes — and the strip must say so while that is
+  // true. The doesNotMatch is the real guard: "nothing open" was accurate for
+  // six days and would read as reassuring rather than stale if it came back.
+  assert.match(html, /refuses reads and clean-up too/);
+  assert.match(html, /posted 2026-08-29/);
+  assert.doesNotMatch(html, /Nothing open right now/);
   assert.doesNotMatch(html, /cannot open a room/i);
   assert.match(html, /support@viibe\.to/);
   assert.match(html, new RegExp(`href="${BASE_PATH}/known-issues/"`));
@@ -429,8 +447,15 @@ test("known issues admits when nothing is broken, with dates", async () => {
   const html = await (await render({}, `${BASE_PATH}/known-issues/`)).text();
 
   assert.match(html, /Known issues/);
-  assert.match(html, /Nothing is on this page right now/);
+  assert.match(html, /A free room that reaches a limit blocks recovery too/);
+  assert.match(html, /Posted 2026-08-29/);
   assert.match(html, /Posted 2026-08-15 · Resolved 2026-08-23/);
+  // The page claims an empty board only when the board is empty.
+  assert.doesNotMatch(html, /Nothing is on this page right now/);
+  // The server's own error tells a stuck owner to go install the OSS server.
+  // The page exists partly to contradict that, so it must never repeat it as
+  // advice: a different install does not recover the room they already have.
+  assert.doesNotMatch(html, /is not a recovery path for a room you already have[\s\S]{0,80}install it/i);
   // The resolved note must not read as a live limitation.
   assert.doesNotMatch(html, /cannot open a One Night room/);
   assert.match(html, /maintained by hand, not generated/);
@@ -573,7 +598,12 @@ test("llms.txt states the tool surface that actually ships", async () => {
   // passed while three separate sentences elsewhere in this same file still said
   // handoff is what makes a world — which is how an agent ends up with contradictory
   // guidance from one document. The negative is the half that catches a stale copy.
-  assert.match(body, /The difference is lifetime, not\ncapability/);
+  // Superseded 2026-08-29: the landing page now states the free room's budget,
+  // so llms.txt saying "not capability" made two surfaces disagree — and this
+  // is the file Glama and PulseMCP crawl, so it is the one that travels.
+  assert.match(body, /The difference is lifetime and\nbudget, not capability/);
+  assert.match(body, /about 16 memories in total, 300 operations each day/);
+  assert.doesNotMatch(body, /a room can do everything a world can/);
   assert.match(body, /Handoff is NOT a paid feature/);
   assert.doesNotMatch(body, /handoff is what\nmakes that true/);
   assert.doesNotMatch(body, /where handoff and minted client keys exist/);
@@ -583,4 +613,54 @@ test("llms.txt states the tool surface that actually ships", async () => {
   assert.doesNotMatch(body, /cannot currently add a trial room/);
   assert.match(body, /came down on 2026-08-23/);
   assert.match(body, /no external users as of 2026-08-15/);
+});
+
+// Self-service billing. The promise "cancel anytime" is only true if there is
+// somewhere on the site to do it; before this, both policy pages sent a paying
+// customer hunting for an old email or into the founder's inbox.
+test("the policy pages send a subscriber to the account page first, not to email", async () => {
+  const terms = await (await render({}, `${BASE_PATH}/terms/`)).text();
+  const support = await (await render({}, `${BASE_PATH}/support/`)).text();
+
+  // On-site cancellation is named, and named BEFORE the receipt-email route.
+  assert.match(terms, /Cancel anytime from the Billing section of your account page/);
+  assert.ok(
+    terms.indexOf("Billing section of your account page") <
+      terms.indexOf("receipt email"),
+    "terms must offer the on-site path before the receipt email",
+  );
+  assert.match(support, /Manage or cancel subscription<\/strong> under Billing/);
+
+  // Email stays, as a fallback for someone locked out — never as the only way.
+  assert.match(support, /Locked out of the account page\?/);
+  assert.doesNotMatch(support, /Manage or\s+cancel from the subscription link in your RevenueCat receipt email\./);
+
+  // Cancelling and deleting stay different things on the page that says so.
+  assert.match(terms, /Cancelling stops the billing\. It does not delete anything/);
+});
+
+// llms.txt is crawled by Glama and PulseMCP, so a heading that contradicts the
+// body is repeated by machines nobody controls. It said "None right now" while
+// the same file already described the capacity gate — a summariser quoting the
+// heading would report a service with no known limitations.
+test("llms.txt does not claim it has no limitations while describing one", async () => {
+  const body = await (await render({}, `${BASE_PATH}/llms.txt`)).text();
+
+  assert.match(body, /## Known limitations/);
+  assert.doesNotMatch(body, /## Known limitations\s+None right now/);
+  // The live one, named in the section a reader is told to trust.
+  assert.match(body, /refuses reads and clean-up as well as writes/);
+  assert.match(body, /429/);
+  // The resolved entry stays, dated, rather than being deleted.
+  assert.match(body, /came down on 2026-08-23/);
+});
+
+// A policy page's date is not decoration: it is how someone establishes which
+// version of the cancellation terms they agreed to. Both pages changed their
+// billing instructions on 2026-08-29 while still displaying older dates.
+test("policy pages date themselves to the day their billing terms changed", async () => {
+  for (const path of ["terms", "support"]) {
+    const html = await (await render({}, `${BASE_PATH}/${path}/`)).text();
+    assert.match(html, /August 29, 2026/, `${path} must carry the date its billing wording changed`);
+  }
 });
