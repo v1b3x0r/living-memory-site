@@ -8,12 +8,33 @@
 //
 // Privacy contract: event names + coarse props only. No emails, no memory
 // contents. distinct_id is the opaque rcUserId once known.
-import posthog from "posthog-js";
+import posthog, { type CaptureResult } from "posthog-js";
 
 const POSTHOG_KEY = "phc_q8cxTW1AtomKPbgdnKf7AEEuNPMpXoiJxrqdvOy06QZ";
 const POSTHOG_HOST = "https://us.i.posthog.com";
 
 let initialized = false;
+
+/**
+ * Drop synthetic exceptions that carry no stack. A cross-origin script served
+ * without CORS surfaces as an opaque "Script error." with `synthetic: true` and
+ * no frames — nobody can act on it, so it only adds noise to error tracking.
+ * A real error from our own bundle keeps its stack (see `crossOrigin` in
+ * next.config.ts) and passes through untouched.
+ */
+export function dropUnactionableExceptions(
+  event: CaptureResult | null,
+): CaptureResult | null {
+  if (!event || event.event !== "$exception") return event;
+  const list = event.properties?.$exception_list;
+  if (!Array.isArray(list) || list.length === 0) return event;
+  const allOpaque = list.every((ex) => {
+    const frames = ex?.stacktrace?.frames;
+    const hasStack = Array.isArray(frames) && frames.length > 0;
+    return ex?.mechanism?.synthetic === true && !hasStack;
+  });
+  return allOpaque ? null : event;
+}
 
 /** Idempotent; safe to call from any client component. No-op outside the browser. */
 export function initTelemetry(): void {
@@ -22,6 +43,7 @@ export function initTelemetry(): void {
   posthog.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
     defaults: "2026-05-30",
+    before_send: dropUnactionableExceptions,
   });
 }
 
