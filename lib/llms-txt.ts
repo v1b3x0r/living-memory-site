@@ -20,8 +20,10 @@ inactive rooms are eventually forgotten, and a room does not migrate into
 a paid world.
 A **world** is the same place that does not end: what was left in it is still
 there days later, and the timeline keeps walking whether or not anyone is in it.
-A world is $9/month and is tied to a sign-in. The difference is lifetime, not
-capability — a room can do everything a world can, while it stays in use.
+A world is $9/month and is tied to a sign-in. The difference is lifetime and
+budget, not capability: a room has every tool a world has, and is metered —
+about 16 memories, 300 operations a day, and 8 live handoff notes. A world is
+unmetered.
 
 ## The tools, and which surface has them
 
@@ -73,9 +75,12 @@ first continuity check.
   it goes unused; any successful use keeps it alive. Once forgotten it answers
   410, and its data is then deleted — memories and handoff notes alike. Nothing
   belonging to a room survives it. Rate-limited per address.
-- A room differs from a world by how long it lasts, not by what it can do: both
-  share memory, hand work between agents, and record which route each note
-  arrived through. A world is what does not end.
+- A room differs from a world by how long it lasts and how much it holds, not by
+  which tools it has: both share memory, hand work between agents, and record
+  which route each note arrived through. A room is metered — roughly 16
+  memories, 300 operations a day (a search counts, it embeds), 8 live notes —
+  and answers 429 once a bound is reached. A world is what does not end, and is
+  unmetered.
 
 ## A world of your own
 

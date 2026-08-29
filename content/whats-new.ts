@@ -51,6 +51,15 @@ export const TICKER_LIMIT = 4;
 
 export const WHATS_NEW: readonly NewsEntry[] = [
   {
+    merged: "2026-08-29",
+    title: "A free room now tells you how much it holds",
+    blurb:
+      "The pricing table gained a line the page had been quiet about: a free room fits about 16 memories and 300 operations a day, and a search counts because it embeds. The room card also says the number instead of implying one — a room stays 21 days from your last visit, and each visit moves that. Nothing changed about what a room can do; we were simply not saying what it costs to use one.",
+    verified: "2026-08-29",
+    verifiedBy:
+      "read the bounds in the running server source rather than inferring them, then fetched the live page from outside on both the slash and no-slash paths and checked the retired wording was gone, not just the new wording present",
+  },
+  {
     merged: "2026-08-26",
     title: "A room now stays as long as you use it",
     blurb:

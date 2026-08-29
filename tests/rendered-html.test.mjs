@@ -291,7 +291,12 @@ test("prices a room and a world as different kinds of thing", async () => {
 
   assert.match(html, /Room \(free\)/);
   assert.match(html, /\$0/);
-  assert.match(html, /Lasts while you use it\./);
+  assert.match(html, /Stays 21 days from your last visit\./);
+
+  // The free tier is metered, and the page says the number a reader actually
+  // hits. Pinned because "about 16 memories" is the one line standing between
+  // a visitor and filling a room they cannot recover (2026-08-29).
+  assert.match(html, /About 16 memories, and 300 operations a day/);
   assert.match(html, /World \(paid\)/);
   assert.match(html, /\$9 \/ month/);
   assert.match(html, /A place to put things down\./);
@@ -368,10 +373,13 @@ test("says on the landing page what does not work", async () => {
   const html = await (await render()).text();
 
   assert.match(html, /Known issues/);
-  // Nothing is broken right now, and the strip must not claim otherwise —
-  // the last entry (Claude web + rooms) resolved 2026-08-23.
-  assert.match(html, /Nothing open right now\./);
-  assert.match(html, /resolved on 2026-08-23/);
+  // Something IS broken as of 2026-08-29 — a free room at a limit refuses reads
+  // and clean-up, not just writes — and the strip must say so while that is
+  // true. The doesNotMatch is the real guard: "nothing open" was accurate for
+  // six days and would read as reassuring rather than stale if it came back.
+  assert.match(html, /refuses reads and clean-up too/);
+  assert.match(html, /posted 2026-08-29/);
+  assert.doesNotMatch(html, /Nothing open right now/);
   assert.doesNotMatch(html, /cannot open a room/i);
   assert.match(html, /support@viibe\.to/);
   assert.match(html, new RegExp(`href="${BASE_PATH}/known-issues/"`));
@@ -429,8 +437,15 @@ test("known issues admits when nothing is broken, with dates", async () => {
   const html = await (await render({}, `${BASE_PATH}/known-issues/`)).text();
 
   assert.match(html, /Known issues/);
-  assert.match(html, /Nothing is on this page right now/);
+  assert.match(html, /A free room that reaches a limit blocks recovery too/);
+  assert.match(html, /Posted 2026-08-29/);
   assert.match(html, /Posted 2026-08-15 · Resolved 2026-08-23/);
+  // The page claims an empty board only when the board is empty.
+  assert.doesNotMatch(html, /Nothing is on this page right now/);
+  // The server's own error tells a stuck owner to go install the OSS server.
+  // The page exists partly to contradict that, so it must never repeat it as
+  // advice: a different install does not recover the room they already have.
+  assert.doesNotMatch(html, /is not a recovery path for a room you already have[\s\S]{0,80}install it/i);
   // The resolved note must not read as a live limitation.
   assert.doesNotMatch(html, /cannot open a One Night room/);
   assert.match(html, /maintained by hand, not generated/);
@@ -573,7 +588,12 @@ test("llms.txt states the tool surface that actually ships", async () => {
   // passed while three separate sentences elsewhere in this same file still said
   // handoff is what makes a world — which is how an agent ends up with contradictory
   // guidance from one document. The negative is the half that catches a stale copy.
-  assert.match(body, /The difference is lifetime, not\ncapability/);
+  // Superseded 2026-08-29: the landing page now states the free room's budget,
+  // so llms.txt saying "not capability" made two surfaces disagree — and this
+  // is the file Glama and PulseMCP crawl, so it is the one that travels.
+  assert.match(body, /The difference is lifetime and\nbudget, not capability/);
+  assert.match(body, /about 16 memories, 300 operations a day/);
+  assert.doesNotMatch(body, /a room can do everything a world can/);
   assert.match(body, /Handoff is NOT a paid feature/);
   assert.doesNotMatch(body, /handoff is what\nmakes that true/);
   assert.doesNotMatch(body, /where handoff and minted client keys exist/);
