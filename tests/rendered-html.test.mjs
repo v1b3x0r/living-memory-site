@@ -302,7 +302,11 @@ test("prices a room and a world as different kinds of thing", async () => {
   // The free tier is metered, and the page says the number a reader actually
   // hits. Pinned because "about 16 memories" is the one line standing between
   // a visitor and filling a room they cannot recover (2026-08-29).
-  assert.match(html, /About 16 memories, and 300 operations a day/);
+  // The two bounds must stay distinguishable: 16 is a lifetime cap, 300 is a
+  // daily one. Written as one comma list they read as "16 a day" — a real
+  // misreading, by NotebookLM, on 2026-08-29.
+  assert.match(html, /About 16 memories in total, and 300 operations each day/);
+  assert.doesNotMatch(html, /16 memories, and 300 operations a day/);
   assert.match(html, /World \(paid\)/);
   assert.match(html, /\$9 \/ month/);
   assert.match(html, /A place to put things down\./);
@@ -598,7 +602,7 @@ test("llms.txt states the tool surface that actually ships", async () => {
   // so llms.txt saying "not capability" made two surfaces disagree — and this
   // is the file Glama and PulseMCP crawl, so it is the one that travels.
   assert.match(body, /The difference is lifetime and\nbudget, not capability/);
-  assert.match(body, /about 16 memories, 300 operations a day/);
+  assert.match(body, /about 16 memories in total, 300 operations each day/);
   assert.doesNotMatch(body, /a room can do everything a world can/);
   assert.match(body, /Handoff is NOT a paid feature/);
   assert.doesNotMatch(body, /handoff is what\nmakes that true/);

@@ -272,7 +272,14 @@ export const landing = {
         },
         {
           label: "How much fits",
-          cells: ["About 16 memories, and 300 operations a day", "Unmetered"],
+          // "a day" attaches to operations, not to memories — but a comma list
+          // invites reading it across both, and NotebookLM did exactly that on
+          // 2026-08-29: it summarised the free room as "16 ความจำต่อวัน", 16
+          // memories PER DAY. That misreads generously, which is the dangerous
+          // direction: someone builds a week of work on a number that is really
+          // a lifetime cap, then hits it and the room 429s reads too. The two
+          // bounds are different kinds of thing and now say so.
+          cells: ["About 16 memories in total, and 300 operations each day", "Unmetered"],
         },
         {
           label: "A handoff note can live",
