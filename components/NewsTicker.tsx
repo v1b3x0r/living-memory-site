@@ -30,16 +30,16 @@ import { WHATS_NEW_INDEX_PATH } from "../lib/site-links";
  * clock, which is the entire job here.
  *
  * There is no time of day in it because there is no time of day in the data.
- * An entry knows the day it was merged, not the hour, and inventing an hour to
- * make the ribbon look richer is the same class of lie this whole feed is
+ * An entry knows the day it was verified, not the hour, and inventing an hour
+ * to make the ribbon look richer is the same class of lie this whole feed is
  * built to avoid.
  *
- * It is labelled "Merged" in the ribbon rather than left bare. Codex caught
- * the bare version: this is the day the code reached main, and with a manual
- * deploy that is not the day a visitor could use it. An unlabelled date on a
- * strip headed "New" reads as an availability date, which is the same lie the
- * two-field schema exists to prevent — split in the data and joined again in
- * the markup is not split at all.
+ * The date shown is `verified` — the day someone opened the running product
+ * and watched this work — and it is labelled "Seen" rather than left bare.
+ * Codex caught the bare version back when this printed `merged`: an unlabelled
+ * date on a strip headed "New" reads as an availability date, and a merge date
+ * is not one. `verified` genuinely is, which is why the label can now say what
+ * the date means instead of warning the reader off it.
  *
  * Pinned to UTC and to en-GB so the server and the browser cannot render two
  * different weekdays for one string.
@@ -59,7 +59,7 @@ function TickerRun() {
   return (
     <span className="ticker__run">
       {ENTRIES.map((entry) => (
-        <span className="ticker__item" key={`${entry.merged}-${entry.title}`}>
+        <span className="ticker__item" key={`${entry.verified}-${entry.title}`}>
           <span className="ticker__star" aria-hidden="true">
             ✦
           </span>
@@ -69,8 +69,8 @@ function TickerRun() {
               the other half of why the old date was misread. */}
           <span className="ticker__chip">
             <span className="ticker__date">
-              <span className="ticker__date-label">Merged</span>
-              {tickerDate(entry.merged)}
+              <span className="ticker__date-label">Seen</span>
+              {tickerDate(entry.verified)}
             </span>
             <span className="ticker__title">{entry.title}</span>
           </span>

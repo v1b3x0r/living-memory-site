@@ -2697,6 +2697,10 @@ button.button:disabled {
   color: var(--muted);
 }
 
+.feed__try {
+  margin: 0.55rem 0 0;
+}
+
 .feed__verified {
   margin: 0.6rem 0 0;
   color: var(--ocean-600);

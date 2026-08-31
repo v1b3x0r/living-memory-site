@@ -1,55 +1,94 @@
-// whats-new.ts — the changelog, and the only source the ticker reads from.
+// whats-new.ts — what a person can see, try, or discover right now.
 //
 // One list, two surfaces: the strip at the top of every page and the index at
 // /whats-new/. They cannot disagree, because there is nowhere for them to
 // disagree from.
 //
-// TWO DATES, AND THE DIFFERENCE IS THE POINT.
+// THIS IS NOT AN ENGINEERING CHANGELOG.
 //
-//   merged   — the day the change reached main. Read it off git; it is a fact
-//              about this repository and nothing else. NOT a release date:
+// It was one, and the field that made it one was `merged`, which the old
+// doctrine defined as "a fact about this repository and nothing else". A
+// required field with that definition is not a date — it is the edge of the
+// world. Everything real that happens outside this repository falls off it
+// automatically, with nobody deciding to leave it out: a shop whose front desk
+// runs on a room, an agent from another company that connects, a world in
+// production doing the thing the product is for. Living Memory is not one
+// repository any more — engine, MCP over stdio, MCP over HTTP, the site — and a
+// reader has never cared which of those a change landed in. They care what is
+// different for them.
+//
+// So the question a row has to answer is: WHAT CAN A HUMAN SEE, TRY, OR
+// DISCOVER NOW? An engineering change earns a row only when it produced
+// something observable from outside. A flag that hides a tool from a listing is
+// a real change and does not belong here; it belongs on the known-issues page,
+// where a reader goes to find out why something is missing.
+//
+// TWO DATES, AND THE DIFFERENCE IS STILL THE POINT.
+//
+//   verified — REQUIRED. The day a person opened the RUNNING product and
+//              watched this work. Not "the tests pass". Not "it merged".
+//              Somebody called it and saw the answer. This is the date the
+//              reader is shown, because it is the only one that is about them.
+//   merged   — OPTIONAL, and only ever a fact about a repository we happen to
+//              own. Read it off git or leave it out. It is NOT a release date:
 //              this project deploys by hand, so main can lead production by
-//              hours. Wherever it is SHOWN it must be labelled "Merged".
-//              Codex caught it printed bare in the ticker, under a heading
-//              that says "New" — split in the data and joined again in the
-//              markup is not split at all.
-//   verified — the day a person opened the RUNNING product and watched this
-//              work. Not "the tests pass". Not "it merged". Somebody called it
-//              and saw the answer.
+//              hours. Wherever it is SHOWN it must be labelled "Merged" —
+//              Codex caught it printed bare under a heading that says "New",
+//              and split in the data but joined in the markup is not split.
 //
-// A changelog is worth exactly what its worst row is worth, and the way these
-// rot is always the same: a merge date gets printed as a ship date, and months
-// later the page is quietly advertising something that never deployed. So a
-// row without a `verified` date does not ship. If you cannot say who checked
-// it and when, the honest move is to leave the entry out until you can.
+// A changelog is worth exactly what its worst row is worth, and a page that
+// says "go and look" is worth less than that when the looking fails — a stale
+// row is boring, a broken invitation is a person standing in front of the
+// thing, watching it not work. So a row without a `verified` date does not
+// ship. If you cannot say who checked it and when, leave it out until you can.
 //
-// This list is also why there is no CMS: five rows in a typed array cannot
+// This list is also why there is no CMS: a few rows in a typed array cannot
 // drift out of sync with the site that renders them.
 //
 // Newest first. The ticker reads the top TICKER_LIMIT of them.
 
 export interface NewsEntry {
-  /** Day the change reached main. From git, not from memory. Never shown unlabelled. */
-  merged: string;
   /** Ticker-length. It has to survive being read sideways at speed. */
   title: string;
-  /** One sentence, for the index. What changed, not how it was built. */
+  /** One sentence, for the index. What is different for a reader. */
   blurb: string;
-  /** Only when a write-up actually exists. A row with no page has no link. */
-  href?: string;
   /** Day someone last watched this work against production. Required. */
   verified: string;
   /** What they actually did to check. Kept honest by having to be written. */
   verifiedBy: string;
+  /**
+   * Where to go and what to notice when you get there. Optional, because some
+   * rows are their own instruction — but when there is somewhere to look, a
+   * reader should not have to work out where.
+   */
+  tryIt?: { href: string; label: string; notice: string };
+  /** Only when a write-up actually exists. A row with no page has no link. */
+  href?: string;
+  /** Day the change reached main, when there is a main it reached. From git. */
+  merged?: string;
 }
 
 export const WHATS_NEW_LEDE =
-  "These are the recent changes, newest first — not every commit, and no attempt to be a full history. Every row carries the day it was merged and the day somebody last opened the running product and watched it work. Those are different dates — this project deploys by hand — and a row that only has the first one does not belong on this page.";
+  "These are the recent things you can see, try, or find for yourself — newest first, not every commit, and no attempt to be a full history. Every row carries the day somebody last opened the running product and watched that thing work; a row that cannot name that day does not belong on this page. Some of it happened in this codebase and some of it happened out in the world, and the page does not rank those differently, because you cannot tell the difference from where you are standing.";
 
 /** How many entries the top strip cycles through before repeating. */
 export const TICKER_LIMIT = 4;
 
 export const WHATS_NEW: readonly NewsEntry[] = [
+  {
+    title: "A cat hotel's front desk runs on a room",
+    blurb:
+      "WINK Grooming & Hotel in Chiang Mai runs its real front desk through a Living Memory room. The shop's prices, its rooms and its boarding rules live in the room rather than in the code, so the people who run the shop can change what the agent says without anyone deploying anything.",
+    tryIt: {
+      href: "https://winkgrooming.com",
+      label: "winkgrooming.com",
+      notice:
+        "open the chat and ask a price in Thai or in English. Notice that it asks how much your cat weighs before it quotes one, that it works out three nights at ฿300 a night on its own, and that when the shop has not written something down it sends you to the shop's LINE instead of inventing an answer. Nothing in that widget's code knows a single price.",
+    },
+    verified: "2026-09-01",
+    verifiedBy:
+      "asked the live endpoint four questions from outside, in Thai and English, and read the answers: the bath question came back asking for weight and coat length, three nights came back as ฿900, and a question the room has no answer for came back as a hand-off to LINE rather than a guess",
+  },
   {
     merged: "2026-08-29",
     title: "A free room now tells you how much it holds",
