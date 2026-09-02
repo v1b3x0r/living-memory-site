@@ -38,3 +38,6 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+
+# Generated incremental TypeScript state — a cache, not a source artifact.
+*.tsbuildinfo

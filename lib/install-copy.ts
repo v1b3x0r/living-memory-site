@@ -205,7 +205,15 @@ export function stepTwo(
 
 export const LOCAL_AGENT_PROMPT = `Install the Living Memory Engine memory server for me. First read its operating guide at ${AGENT_GUIDE_URL}. The server is the npm package "@nature-labs/lme-mcp" — a local stdio MCP server that gives you persistent memory tools. Read the package README, install it, configure it as an MCP server on this machine, run its bundled smoke test, and show me the tools that became available. Ask me before changing any existing configuration. Then follow the guide to help me store one safe fact and verify it from a fresh session or client. If you cannot finish, tell me exactly which step failed so I can do it by hand.`;
 
+/**
+ * Reads the name from SERVER_NAMES rather than repeating it. It used to say "living-memory"
+ * literally, which was wrong twice over: it hardcoded a name the constant owns, and the name it
+ * hardcoded belonged to the WORLD rail while this prompt is handed out with a ROOM. So
+ * `create_free_room` returned an answer that contradicted itself — `serverName: "room"` in the
+ * data, "call it living-memory" in the prose — and an agent reading one response got two
+ * instructions. Predates the rename; the rename only made it visible. (Codex, PR #3.)
+ */
 export function remoteAgentPrompt(url: string, expiresAt: string): string {
   const expires = new Date(expiresAt).toUTCString();
-  return `Connect this remote MCP server for me: ${url} (streamable HTTP, POST, no auth header). It is a hosted Living Memory Engine room — a shared memory your agents can all reach — that stays available while it's used; if left inactive, it is currently set to expire ${expires}. First read its operating guide at ${AGENT_GUIDE_URL}. Register the endpoint in my MCP client configuration under the name "living-memory" and show me the tools that became available. Then follow the guide to help me store one safe fact and verify it from a fresh session or client. If you cannot finish, tell me exactly which step failed.`;
+  return `Connect this remote MCP server for me: ${url} (streamable HTTP, POST, no auth header). It is a hosted Living Memory Engine room — a shared memory your agents can all reach — that stays available while it's used; if left inactive, it is currently set to expire ${expires}. First read its operating guide at ${AGENT_GUIDE_URL}. Register the endpoint in my MCP client configuration under the name "${SERVER_NAMES.room}" and show me the tools that became available. Then follow the guide to help me store one safe fact and verify it from a fresh session or client. If you cannot finish, tell me exactly which step failed.`;
 }
