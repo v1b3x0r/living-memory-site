@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { BASE_PATH } from "../lib/base-path.ts";
+import { SERVER_NAMES } from "../lib/install-copy.ts";
 
 async function loadWorker() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -274,7 +275,11 @@ test("keeps steps 1 and 3 identical for every client, and warns about the two ra
   // Every client tab is reachable, and each server is named distinctly.
   for (const tab of ["ChatGPT", "Cursor", "Claude Code", "Any MCP client"])
     assert.match(html, new RegExp(tab));
-  assert.match(html, /lm-room/);
+  // The name is the KIND, so a person can extend it into room-library when they
+  // connect a second one. Asserted through the constant rather than the literal:
+  // this test is about the page teaching A name, and install-copy owns which.
+  assert.match(html, new RegExp(SERVER_NAMES.room));
+  assert.doesNotMatch(html, /lm-room/);
 });
 
 test("gives the page its most air to the reason not to buy", async () => {

@@ -1,6 +1,12 @@
 // llms-txt.ts — the agent-facing index of this product (served at /llms.txt).
 // Same doctrine as the package README: state what exists, what does not, and
 // how it fails. An agent reading this should be able to act without the HTML.
+//
+// The server name is READ from SERVER_NAMES, never retyped. This file and the
+// installer are two public surfaces describing the same install; a name typed
+// twice drifts, and an agent following one ends up with a server the other
+// cannot talk about.
+import { SERVER_NAMES } from "./install-copy.ts";
 
 export const LLMS_TXT = `# Living Memory
 
@@ -56,7 +62,7 @@ first continuity check.
 
 - npm package: @nature-labs/lme-mcp — https://www.npmjs.com/package/@nature-labs/lme-mcp
 - Claude Code:
-  claude mcp add living-memory -s user --env LME_SNAPSHOT=$HOME/.living-memory/brain.json -- npx -y @nature-labs/lme-mcp
+  claude mcp add ${SERVER_NAMES.local} -s user --env LME_SNAPSHOT=$HOME/.living-memory/brain.json -- npx -y @nature-labs/lme-mcp
 - Any stdio MCP client: command "npx", args ["-y", "@nature-labs/lme-mcp"]
 - The package README is written to be read by a coding agent. If you are an
   agent: read it first, then install, run the bundled smoke test, and report

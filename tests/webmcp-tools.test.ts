@@ -67,6 +67,13 @@ test("the response teaches every client the installer teaches, verbatim", () => 
   // The ready-made prompt an agent can hand to ANOTHER agent is the same one
   // the installer ships.
   assert.equal(res.agentPrompt, remoteAgentPrompt(GRANT.url, GRANT.expiresAt));
+  // THE RESPONSE MUST NOT CONTRADICT ITSELF. The assertion above compares the function's output to
+  // the same function's output — it cannot fail whatever the prompt says. This one reads the prompt:
+  // it told the agent to register the server as "living-memory" while the same response carried
+  // serverName "room", so one answer gave two instructions. Predates the rename; the rename only
+  // made it visible. (Codex, PR #3.)
+  assert.match(res.agentPrompt, new RegExp(`under the name "${res.room.serverName}"`));
+  assert.doesNotMatch(res.agentPrompt, /under the name "living-memory"/);
   // Lifecycle truth: inactivity, not a fixed lifetime.
   assert.match(res.lifecycle, /inactiv/i);
   // The same secrecy warning the hero shows a human.

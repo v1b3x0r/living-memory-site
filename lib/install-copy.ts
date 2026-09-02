@@ -22,11 +22,26 @@ export const KEEP_PATH = "/living-memory/keep/";
  * Server names are not decoration. An agent connected to two Living Memory
  * worlds cannot tell which one answered — we watched one search the wrong
  * world about fourteen times. Distinct names per rail are the fix.
+ *
+ * RENAMED 2026-09-02 from lm-room / lm-cloud / lm-local. The old set fixed less
+ * than it looked: it distinguished the three RAILS but not two places on the
+ * same rail, so a person who connected two rooms was back to two servers called
+ * lm-room and an agent with no way to tell them apart. And it was not even
+ * consistent — two names carried the lm- prefix and the third did not.
+ *
+ * The name is now the KIND, and the kind is a prefix a person extends when they
+ * need to: room-library, room-standup. The setup console teaches that rather
+ * than inventing an instance name nobody chose — a fresh anonymous room has no
+ * meaning yet, and room-a7f2 is no more recognisable to a human than room.
+ *
+ * Kept byte-identical with lm-launcher's src/lib/install.ts. Two surfaces
+ * teaching different names for the same server is the drift this constant
+ * exists to prevent.
  */
 export const SERVER_NAMES = {
-  room: "lm-room",
-  cloud: "lm-cloud",
-  local: "lm-local",
+  room: "room",
+  cloud: "world",
+  local: "local",
 } as const;
 
 /** Shown before a room exists. Never a real token — see the mint flow. */
@@ -190,7 +205,15 @@ export function stepTwo(
 
 export const LOCAL_AGENT_PROMPT = `Install the Living Memory Engine memory server for me. First read its operating guide at ${AGENT_GUIDE_URL}. The server is the npm package "@nature-labs/lme-mcp" — a local stdio MCP server that gives you persistent memory tools. Read the package README, install it, configure it as an MCP server on this machine, run its bundled smoke test, and show me the tools that became available. Ask me before changing any existing configuration. Then follow the guide to help me store one safe fact and verify it from a fresh session or client. If you cannot finish, tell me exactly which step failed so I can do it by hand.`;
 
+/**
+ * Reads the name from SERVER_NAMES rather than repeating it. It used to say "living-memory"
+ * literally, which was wrong twice over: it hardcoded a name the constant owns, and the name it
+ * hardcoded belonged to the WORLD rail while this prompt is handed out with a ROOM. So
+ * `create_free_room` returned an answer that contradicted itself — `serverName: "room"` in the
+ * data, "call it living-memory" in the prose — and an agent reading one response got two
+ * instructions. Predates the rename; the rename only made it visible. (Codex, PR #3.)
+ */
 export function remoteAgentPrompt(url: string, expiresAt: string): string {
   const expires = new Date(expiresAt).toUTCString();
-  return `Connect this remote MCP server for me: ${url} (streamable HTTP, POST, no auth header). It is a hosted Living Memory Engine room — a shared memory your agents can all reach — that stays available while it's used; if left inactive, it is currently set to expire ${expires}. First read its operating guide at ${AGENT_GUIDE_URL}. Register the endpoint in my MCP client configuration under the name "living-memory" and show me the tools that became available. Then follow the guide to help me store one safe fact and verify it from a fresh session or client. If you cannot finish, tell me exactly which step failed.`;
+  return `Connect this remote MCP server for me: ${url} (streamable HTTP, POST, no auth header). It is a hosted Living Memory Engine room — a shared memory your agents can all reach — that stays available while it's used; if left inactive, it is currently set to expire ${expires}. First read its operating guide at ${AGENT_GUIDE_URL}. Register the endpoint in my MCP client configuration under the name "${SERVER_NAMES.room}" and show me the tools that became available. Then follow the guide to help me store one safe fact and verify it from a fresh session or client. If you cannot finish, tell me exactly which step failed.`;
 }
