@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as installCopy from "../lib/install-copy.ts";
+import * as llms from "../lib/llms-txt.ts";
 
 test("local install hands the agent one public operating guide and a continuity check", () => {
   assert.equal(
@@ -31,4 +32,12 @@ test("the Claude tab shares the one step 1 — the exception is retired (A159)",
   const step = installCopy.stepTwo("claude", "cloud", "https://lme.example/t/x/mcp");
   assert.equal(step.code, "https://lme.example/t/x/mcp");
   assert.match(step.lines.join(" "), /connector/i);
+});
+
+test("the public agent index teaches the same local server name as the installer", () => {
+  // /llms.txt is a distribution surface, not a comment: an agent that follows it
+  // registers the server for real. Two public surfaces naming the same server
+  // differently is the drift SERVER_NAMES exists to prevent (Codex P2).
+  assert.match(llms.LLMS_TXT, new RegExp(`claude mcp add ${installCopy.SERVER_NAMES.local}\\b`));
+  assert.doesNotMatch(llms.LLMS_TXT, /claude mcp add living-memory\b/);
 });
