@@ -22,11 +22,26 @@ export const KEEP_PATH = "/living-memory/keep/";
  * Server names are not decoration. An agent connected to two Living Memory
  * worlds cannot tell which one answered — we watched one search the wrong
  * world about fourteen times. Distinct names per rail are the fix.
+ *
+ * RENAMED 2026-09-02 from lm-room / lm-cloud / lm-local. The old set fixed less
+ * than it looked: it distinguished the three RAILS but not two places on the
+ * same rail, so a person who connected two rooms was back to two servers called
+ * lm-room and an agent with no way to tell them apart. And it was not even
+ * consistent — two names carried the lm- prefix and the third did not.
+ *
+ * The name is now the KIND, and the kind is a prefix a person extends when they
+ * need to: room-library, room-standup. The setup console teaches that rather
+ * than inventing an instance name nobody chose — a fresh anonymous room has no
+ * meaning yet, and room-a7f2 is no more recognisable to a human than room.
+ *
+ * Kept byte-identical with lm-launcher's src/lib/install.ts. Two surfaces
+ * teaching different names for the same server is the drift this constant
+ * exists to prevent.
  */
 export const SERVER_NAMES = {
-  room: "lm-room",
-  cloud: "lm-cloud",
-  local: "lm-local",
+  room: "room",
+  cloud: "world",
+  local: "local",
 } as const;
 
 /** Shown before a room exists. Never a real token — see the mint flow. */
