@@ -2885,19 +2885,29 @@ button.button:disabled {
   line-height: 1.6;
 }
 
-/* The minimum every page owes, including the two that carry no strip. */
+/* The minimum every page owes, including the two that carry no strip.
+ *
+ * THE COLOURS ARE THE FOOTER'S OWN, and the first version's were not: it was written with
+ * --water-100 on --line-on-dark, which are the palette's ON-DARK values, while .site-footer is
+ * rgba(255,255,255,0.92). About 1.15:1 — legible in the imagination and not on the screen. That
+ * made the one bridge /keep and /oauth/* have the one that could not be seen, which is the exact
+ * failure those two pages were relying on it not to be. Caught by Codex on PR #5.
+ *
+ * It now matches .site-footer__social, the link two lines above it in the same block: the same
+ * --ocean-800 the rest of this footer uses for something you are meant to click. */
 .site-footer__bridge {
   display: inline-block;
   margin-top: 0.35rem;
-  color: var(--water-100);
+  color: var(--ocean-800);
   font-size: 0.84rem;
   font-weight: 700;
   text-decoration: none;
-  border-bottom: 1px solid var(--line-on-dark);
+  border-bottom: 1px solid var(--line);
 }
 
 .site-footer__bridge:hover {
-  border-bottom-color: var(--water-100);
+  color: var(--ocean-600);
+  border-bottom-color: currentColor;
 }
 
 @media (max-width: 640px) {
