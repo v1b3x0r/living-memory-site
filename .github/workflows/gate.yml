@@ -1,0 +1,72 @@
+# The gate this repository did not have.
+#
+# WHY IT IS BEING ADDED NOW. Until today nothing ran on a pull request here:
+# `gh pr view --json statusCheckRollup` returned an empty list, so every merge
+# rested on whatever the last person happened to run on their own machine.
+# That is not hypothetical — the sibling repository sat with a RED main for
+# days under exactly this arrangement, a test asserting "nine tools" against
+# source that said eleven, and nobody could see it. With no CI, "the tests
+# pass" is only ever a claim about one laptop.
+#
+# WHAT IT RUNS: scripts/test-all.mjs, the same list a person runs locally with
+# `npm test`. Not a copy of it — a second list in this file would drift from
+# the first the moment somebody adds a check to only one of them, and would do
+# it silently.
+name: gate
+
+on:
+  pull_request:
+  # main too, and not as an afterthought: a branch that was green at review
+  # can still land broken, and the failure this workflow exists to prevent was
+  # discovered on main rather than in a PR.
+  push:
+    branches: [main]
+
+# Read-only. This workflow builds and tests; it has no business writing to the
+# repository, and a token that cannot write cannot be talked into writing.
+permissions:
+  contents: read
+
+# A superseded run tells you about code nobody is looking at any more.
+concurrency:
+  group: gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # package.json says >=22.13.0. Pinned to the major rather than to a
+          # patch so a security release is picked up without a commit here.
+          node-version: '22'
+          cache: npm
+
+      # ci, not install: it installs exactly what package-lock.json says and
+      # fails if the lockfile and package.json disagree, which is itself a
+      # check worth having.
+      - run: npm ci
+
+      - run: npm test -- --no-audit
+
+  audit:
+    name: dependency advisories
+    runs-on: ubuntu-latest
+    # DELIBERATELY NOT BLOCKING. These are advisories in transitive packages
+    # whose fix timing is not ours; today browserslist and fast-uri are open.
+    # A required check that is red on arrival trains people to ignore red,
+    # which costs more than the advisories do. Visible, not gating — and if
+    # this is ever green for a while, promoting it is one line.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run audit:prod
