@@ -8,7 +8,12 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <PolicyPage eyebrow="DATA PRACTICES" title="Privacy policy" updated="August 16, 2026">
+    <PolicyPage
+      bridgeSource="privacy"
+      eyebrow="DATA PRACTICES"
+      title="Privacy policy"
+      updated="August 16, 2026"
+    >
       <p>
         Living Memory Engine (LME) stores information only when you ask it to remember something
         or use a feature that clearly requires stored memory. Do not submit passwords, one-time

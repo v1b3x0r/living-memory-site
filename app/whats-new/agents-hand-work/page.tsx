@@ -14,6 +14,7 @@ export const metadata: Metadata = pageMeta({
 export default function AgentsHandWorkPage() {
   return (
     <PolicyPage
+      bridgeSource="whats-new-entry"
       eyebrow="WHAT'S NEW"
       title="Agents can now hand work to each other"
       updated="2026-08-15"

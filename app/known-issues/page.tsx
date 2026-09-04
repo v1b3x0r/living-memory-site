@@ -15,6 +15,7 @@ export const metadata: Metadata = pageMeta({
 export default function KnownIssuesPage() {
   return (
     <PolicyPage
+      bridgeSource="known-issues"
       eyebrow="WHAT DOESN'T WORK"
       title="Known issues"
       updated="August 29, 2026"
