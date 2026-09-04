@@ -34,6 +34,13 @@ concurrency:
 
 jobs:
   gate:
+    # THIS STRING IS REFERENCED FROM OUTSIDE THE REPOSITORY. Branch protection
+    # on main names the required check by the JOB's name — "build and tests",
+    # not the workflow's "gate" — so renaming it here does not rename it there.
+    # The result of getting that wrong is not a red check: it is a check that
+    # never arrives, every pull request stuck on "Expected - waiting for
+    # status", and nothing in this file to explain why. Change it and change
+    # the required-checks list in Settings -> Branches in the same breath.
     name: build and tests
     runs-on: ubuntu-latest
     steps:
