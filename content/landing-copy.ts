@@ -30,7 +30,11 @@ export const landing = {
       { label: "How it works", href: "#installer" },
       { label: "Pricing", href: "#pricing" },
     ],
-    cta: "Open a room — free",
+    // NOT the same button as the hero's, and no longer the same job. The hero
+    // still opens a room here, because this page still mints them. The nav's
+    // primary control is now the crossing to the current entrance — founder's
+    // call, 2026-09-04: one button, the one in the top-right corner.
+    cta: "Open Launcher",
   },
 
   hero: {

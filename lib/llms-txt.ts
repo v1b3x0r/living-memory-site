@@ -116,7 +116,9 @@ stops being true.
 
 ## Links
 
-- Site: https://viibe.to/living-memory/
+- Launcher (the current entrance — a newer web experience than this site, and
+  where a room or a world is started today): https://living-memory.app/
+- Site (this one, the original): https://viibe.to/living-memory/
 - Known issues (what does not work today, dated): https://viibe.to/living-memory/known-issues/
 - Latest write-up: https://viibe.to/living-memory/whats-new/agents-hand-work/
 - Engine source: https://github.com/v1b3x0r/living-memory-engine

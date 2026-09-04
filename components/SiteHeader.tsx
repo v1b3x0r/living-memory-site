@@ -1,5 +1,6 @@
 import { landing } from "../content/landing-copy";
 import { AGENT_GUIDE_PATH, KEEP_PATH } from "../lib/install-copy";
+import { launcherUrl } from "../lib/launcher";
 import { KNOWN_ISSUES_PATH, WHATS_NEW_INDEX_PATH } from "../lib/site-links";
 import { LmeMark } from "./LmeMark";
 
@@ -42,7 +43,17 @@ export function SiteHeader() {
         <a className="text-link" href={KEEP_PATH}>
           Sign in — your world
         </a>
-        <a className="button button--primary button--compact" href="#installer">
+        {/* The nav's primary control now LEAVES this site. It used to scroll to
+            the installer on this page, which the hero's own button already
+            does better and still does — so this slot was the strongest place
+            on the most-landed-on URL of the product to put the crossing, and
+            spending it on a second route to the same section was waste.
+            Founder's call, 2026-09-04: this button only, not the hero's, and
+            nothing about the WebMCP room creator changes. */}
+        <a
+          className="button button--primary button--compact"
+          href={launcherUrl("legacy-nav")}
+        >
           {landing.nav.cta}
         </a>
       </nav>
@@ -60,7 +71,9 @@ export function SiteHeader() {
           <a className="nav-menu__account" href={KEEP_PATH}>
             Sign in — your world
           </a>
-          <a className="button button--primary" href="#installer">
+          {/* Same control at the phone breakpoint, so it makes the same
+              crossing — on a phone this IS the top-right button. */}
+          <a className="button button--primary" href={launcherUrl("legacy-nav")}>
             {landing.nav.cta}
           </a>
         </div>
