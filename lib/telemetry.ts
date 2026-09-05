@@ -19,8 +19,19 @@ let initialized = false;
  * Drop synthetic exceptions that carry no stack. A cross-origin script served
  * without CORS surfaces as an opaque "Script error." with `synthetic: true` and
  * no frames — nobody can act on it, so it only adds noise to error tracking.
- * A real error from our own bundle keeps its stack (see `crossOrigin` in
- * next.config.ts) and passes through untouched.
+ * Anything carrying frames passes through untouched.
+ *
+ * THE COMPANION next.config CHANGE WAS REMOVED, and the reason belongs here rather
+ * than in a commit nobody re-reads. This PR originally set `crossOrigin: "anonymous"`
+ * alongside, to keep stacks instead of merely dropping the stackless ones. It was a
+ * no-op twice over. vinext — this site builds on vinext, not Next itself — never reads
+ * `config.crossOrigin`; and our own chunks are served same-origin from
+ * /living-memory/_next/, and a same-origin script never produces the opaque error in
+ * the first place. The genuinely cross-origin scripts on the page belong to third
+ * parties, which our config could not tag either way.
+ *
+ * So what is dropped here is third-party noise we were never going to be able to
+ * action, and the filter is the whole fix rather than half of one.
  */
 export function dropUnactionableExceptions(
   event: CaptureResult | null,
