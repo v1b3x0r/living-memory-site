@@ -2797,3 +2797,122 @@ button.button:disabled {
 .feedback-box__opener:hover {
   color: var(--ink);
 }
+
+/* ── The crossing between the two generations ──────────────────────────────
+   There are two Living Memory websites. This is the first one, still reachable
+   through search results, shared links, directory badges and bookmarks that
+   cannot be recalled; the Launcher is the second and is the current entrance.
+   Nothing here linked to it, so every one of these pages was a closed room.
+
+   The strip is deliberately NOT styled as chrome. It sits directly under the
+   ticker, and the ticker is loud — a second loud band would read as more of
+   the same page's decoration, which is exactly the failure to avoid: a visitor
+   who thinks this is another section of the site they are on will not cross.
+   So it is a plain, high-contrast notice: a light band, a hard left edge, and
+   the one label that names the situation before the link offers a way out. */
+.bridge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1.1rem;
+  width: var(--page);
+  margin: 0.85rem auto 0;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--ocean-600);
+  border-radius: 0.35rem;
+  background: var(--paper);
+}
+
+.bridge__text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* The label does the discovering. "Original site" is a fact about WHERE YOU
+   ARE, which is the piece a bare link cannot carry. */
+.bridge__tag {
+  margin-right: 0.55rem;
+  padding: 0.16rem 0.42rem;
+  border-radius: 0.25rem;
+  background: var(--ocean-950);
+  color: var(--water-100);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bridge__link {
+  flex: 0 0 auto;
+  color: var(--ocean-800);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid currentColor;
+}
+
+.bridge__link:hover {
+  color: var(--ocean-600);
+}
+
+/* /whats-new only — the page a real visitor was confirmed to have got stuck
+   on. It is a panel rather than a line because the reader is already reading:
+   a notice sized like the surrounding prose is read as prose and skipped. */
+.bridge-panel {
+  margin: 1.6rem 0 2rem;
+  padding: 1.15rem 1.25rem 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, var(--paper) 0%, var(--paper-blue) 100%);
+  box-shadow: 0 1px 0 rgba(30, 77, 122, 0.06);
+}
+
+.bridge-panel__title {
+  margin: 0.35rem 0 0;
+  font-size: 1.28rem;
+  line-height: 1.25;
+}
+
+.bridge-panel__copy {
+  margin: 0.55rem 0 1rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* The minimum every page owes, including the two that carry no strip.
+ *
+ * THE COLOURS ARE THE FOOTER'S OWN, and the first version's were not: it was written with
+ * --water-100 on --line-on-dark, which are the palette's ON-DARK values, while .site-footer is
+ * rgba(255,255,255,0.92). About 1.15:1 — legible in the imagination and not on the screen. That
+ * made the one bridge /keep and /oauth/* have the one that could not be seen, which is the exact
+ * failure those two pages were relying on it not to be. Caught by Codex on PR #5.
+ *
+ * It now matches .site-footer__social, the link two lines above it in the same block: the same
+ * --ocean-800 the rest of this footer uses for something you are meant to click. */
+.site-footer__bridge {
+  display: inline-block;
+  margin-top: 0.35rem;
+  color: var(--ocean-800);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-footer__bridge:hover {
+  color: var(--ocean-600);
+  border-bottom-color: currentColor;
+}
+
+@media (max-width: 640px) {
+  .bridge {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

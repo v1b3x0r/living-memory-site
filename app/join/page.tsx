@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 export default function JoinPage() {
   return (
     <PolicyPage
+      bridgeSource="join"
       eyebrow="YOU'RE INVITED"
       title="Join a shared memory room"
       updated="August 27, 2026"

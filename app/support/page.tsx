@@ -9,7 +9,12 @@ export const metadata: Metadata = {
 
 export default function SupportPage() {
   return (
-    <PolicyPage eyebrow="HUMAN SUPPORT" title="Support" updated="August 29, 2026">
+    <PolicyPage
+      bridgeSource="support"
+      eyebrow="HUMAN SUPPORT"
+      title="Support"
+      updated="August 29, 2026"
+    >
       <p>
         Email <a href="mailto:support@viibe.to">support@viibe.to</a> for hosted access,
         privacy, deletion, or reliability questions. This is the shared support mailbox for products

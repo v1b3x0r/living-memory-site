@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { landing } from "../content/landing-copy";
 import { BASE_PATH } from "../lib/base-path";
+import { launcherUrl } from "../lib/launcher";
 import { AGENT_GUIDE_PATH, GITHUB_URL, NPM_URL } from "../lib/install-copy";
 import {
   KNOWN_ISSUES_PATH,
@@ -69,6 +70,14 @@ export function SiteFooter() {
           />
           <p className="site-footer__tagline">{landing.footer.tagline}</p>
           <p className="site-footer__invariant">{landing.footer.invariant}</p>
+          {/* The footer renders on EVERY page, including /keep and /oauth/*,
+              which deliberately carry no banner — they are in the middle of a
+              purchase or a sign-in and a sideways exit does not belong there.
+              This line is what makes "no banner" different from "no way out":
+              quiet, below the fold, and still says which is the current one. */}
+          <a className="site-footer__bridge" href={launcherUrl("legacy-footer")}>
+            Newer experience: open the Launcher<span aria-hidden="true"> →</span>
+          </a>
           <a
             className="site-footer__social"
             href={GITHUB_URL}
