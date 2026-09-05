@@ -55,7 +55,7 @@ test("the public agent index teaches the same local server name as the installer
   assert.doesNotMatch(llms.LLMS_TXT, /claude mcp add living-memory\b/);
 });
 
-/* THE GUARD THAT WAS MISSING, and the reason this test exists rather than a fix alone.
+/* THE GUARD THAT WAS MISSING, and the reason it exists rather than a one-line fix alone.
  *
  * The 2026-09-02 rename to room / world / local reached every surface except one line on /keep,
  * where the name was typed as text instead of read from SERVER_NAMES. It survived three days for
@@ -63,111 +63,42 @@ test("the public agent index teaches the same local server name as the installer
  * guard in the suite was `doesNotMatch(html, /lm-room/)` on the LANDING page — one name out of
  * three, on one surface out of many. A partial guard reads as a guard.
  *
- * So this asserts over SOURCE: a retired name cannot be typed anywhere a person will read it,
- * whichever route renders it and whether or not that route is reachable without a receipt.
+ * IT DOES NOT READ SYNTAX, AND THAT IS THE WHOLE DESIGN — arrived at the hard way, over five
+ * rounds of review on PR #7. Every earlier version tried to tell copy from commentary by parsing:
+ * exempt the file that documents the rename (which unguarded the module that GENERATES installer
+ * copy), then match comment prefixes (wrong for JSX, whose `{/*` has continuation lines of plain
+ * prose), then track block state (which read the `//` in `https://` as a comment and threw away
+ * the rest of the line), then track quoting too, then report an unterminated comment at EOF — and
+ * that last one still missed a false block opened by a regex like `/[/*]/` and closed by the next
+ * JSDoc, which swallows the copy in between and leaves the file looking balanced.
  *
- * WHAT COUNTS AS "A PERSON WILL READ IT" took two rounds of review to get right, and both
- * corrections came from Codex on PR #7:
+ * Each round was green, and green for a different wrong reason. The lesson is not "the scanner
+ * needed one more case"; it is that a test guarding twelve words of copy had been asked to become
+ * a JavaScript lexer, and a lexer that is nearly right is confidently wrong in new ways.
  *
- * · THE EXEMPTION IS COMMENTS, NOT FILES. Exempting lib/install-copy.ts wholesale would have left
- *   the module that GENERATES installer steps and agent prompts unguarded — the largest copy
- *   surface in the repo, and exactly where the next miss would hide. What has to stay legal is the
- *   HISTORY: a rename note has to be able to name what it replaced.
- *
- * · SO THE COMMENT TEST TRACKS BLOCK STATE INSTEAD OF GUESSING. The first version matched lines
- *   starting with //, slash-star or star, which is wrong for JSX: `{/*` opens a comment whose
- *   CONTINUATION lines begin with ordinary prose (app/layout.tsx:126 and app/page.tsx:29 are both
- *   like this today). A rename note written inside one would have been read as product copy and
- *   failed CI for nothing. Comments are stripped with a scanner carrying state across lines, and
- *   the match runs on what is left.
- *
- * · MARKDOWN IS SCANNED WHOLE. public/skills/living-memory/SKILL.md is a live install surface —
- *   AGENT_GUIDE_PATH points at it and agents are told to read it first — and it has no comment
- *   syntax, so every line of it is copy. */
+ * So the rule is now unconditional and legible: a retired name is a failure ANYWHERE, unless the
+ * line carries the marker [retired-name-ok]. Nothing is inferred. The exemption is deliberate,
+ * greppable, and visible in review — which is what it always should have been, since the whole
+ * point is to make a name that is not supposed to exist impossible to type by accident. */
+const RETIRED = /lm-(room|cloud|local)/;
+const ALLOW = "[retired-name-ok]";
+
 test("no surface retypes a retired server name", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
-  const RETIRED = /lm-(room|cloud|local)/;
-
-  /* Strip comments and keep everything else, carrying state across lines.
-   *
-   * STRINGS ARE COPY, so their contents stay — and their contents are also why the scanner has to
-   * know it is inside one. `https://example.test` contains `//`, and a version of this that did
-   * not track quoting read that as a line comment and threw away the rest of the line, taking a
-   * retired name sitting after a URL with it. Verified by running it, not reasoned about: given
-   * `<a href="https://example.test">Name it lm-cloud</a>` the old scanner returned
-   * `<a href="https:` and the guard went green. Codex raised it as P2 on PR #7, round three.
-   *
-   * Backticks are the one quote that survives a line ending; ' and " do not, so they are reset at
-   * the end of each line rather than leaking a mismatched quote into the rest of the file. */
-  const codeOnly = (
-    source: string,
-    hasComments: boolean,
-  ): { lines: string[]; lost: boolean } => {
-    if (!hasComments) return { lines: source.split("\n"), lost: false };
-    let inBlock = false;
-    let inString: string | null = null;
-    const lines = source.split("\n").map((line) => {
-      let out = "";
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (inBlock) {
-          if (line.startsWith("*/", i)) ((inBlock = false), i++);
-        } else if (inString) {
-          out += ch;
-          if (ch === "\\") out += line[++i] ?? "";
-          else if (ch === inString) inString = null;
-        } else if (line.startsWith("/*", i)) ((inBlock = true), i++);
-        else if (line.startsWith("//", i)) break;
-        else {
-          if (ch === "'" || ch === '"' || ch === "`") inString = ch;
-          out += ch;
-        }
-      }
-      if (inString && inString !== "`") inString = null;
-      return out;
-    });
-    /* THE SENTINEL, and it answers a finding rather than dodging it — Codex asked for regex
-     * literals to be recognised, because `/[/*]/` reads as a block-comment opener and everything
-     * after it is swallowed. That construct appears nowhere in this repository, and telling a
-     * regex literal from a division reliably is a job for a JavaScript lexer: the guard would end
-     * up more complicated than the copy it guards, which is its own kind of risk.
-     *
-     * So this catches the CONSEQUENCE instead of enumerating causes. A file that ends while the
-     * scanner still believes it is inside a block comment is a file the scanner lost track of —
-     * whatever confused it — and the swallowed remainder is exactly the silent miss the finding
-     * describes. It is reported as an offender, so the guard fails loudly and names the file
-     * rather than passing on a half-read one. */
-    return { lines, lost: inBlock };
-  };
 
   /* The guard's own guard: a rule that silently stopped matching would leave the suite green and
-   * the product unprotected, which is the failure this whole test was written about. */
-  const { lines: probe } = codeOnly(
-    [
-      'const a = "Name it lm-cloud";',
-      "{/* RENAMED from",
-      "   lm-room, which is history */}",
-      'const b = "lm-local";',
-      '<a href="https://example.test">Name it lm-cloud</a>',
-    ].join("\n"),
-    true,
-  );
-  assert.ok(RETIRED.test(probe[0]), "a retired name in a string is copy");
+   * the product unprotected, which is the failure this test exists to prevent. */
   assert.ok(
-    !RETIRED.test(probe[2]),
-    "a JSX comment's continuation line is history, not copy",
+    RETIRED.test('<a href="https://x.test">Name it lm-cloud</a>'),
+    "copy is caught",
   );
   assert.ok(
-    RETIRED.test(probe[3]),
-    "code after a closed comment is copy again",
+    RETIRED.test("const re = /[/*]/; // lm-room"),
+    "no syntax can hide a name",
   );
   assert.ok(
-    RETIRED.test(probe[4]),
-    "a URL earlier on the line does not hide what follows it",
-  );
-  assert.ok(
-    codeOnly("/* opened and never closed\nName it lm-cloud", true).lost,
-    "a file the scanner lost track of is reported rather than silently half-read",
+    " * RENAMED from lm-room " + ALLOW,
+    "history is exempt by marker, not by guesswork",
   );
 
   const walk = async (dir: string, match: RegExp): Promise<string[]> => {
@@ -180,28 +111,22 @@ test("no surface retypes a retired server name", async () => {
     return out;
   };
 
-  const sources = (
-    await Promise.all(
-      ["app", "components", "lib", "content"].map((d) =>
+  /* Every surface a person or an agent reads: the app, the Worker that serves robots.txt,
+   * llms.txt and the auth guide as public text, and the published skill artifacts. */
+  const files = (
+    await Promise.all([
+      ...["app", "components", "lib", "content", "worker"].map((d) =>
         walk(d, /\.(tsx?|mjs)$/),
       ),
-    )
+      walk("public/skills", /\.(md|ya?ml)$/),
+    ])
   ).flat();
-  /* Everything published under public/skills is an install surface somebody reads: SKILL.md is
-   * what AGENT_GUIDE_PATH points at, and agents/openai.yaml carries the default_prompt a user is
-   * shown. Neither holds a rename history to protect, so both are read whole. */
-  const guides = await walk("public/skills", /\.(md|ya?ml)$/);
 
   const offenders: string[] = [];
-  for (const file of [...sources, ...guides]) {
+  for (const file of files) {
     const raw = await readFile(file, "utf8");
-    const { lines, lost } = codeOnly(raw, /\.(tsx?|mjs)$/.test(file));
-    if (lost)
-      offenders.push(
-        `${file}: scanner ended inside a comment — this file was not checked`,
-      );
-    lines.forEach((line, i) => {
-      if (RETIRED.test(line))
+    raw.split("\n").forEach((line, i) => {
+      if (RETIRED.test(line) && !line.includes(ALLOW))
         offenders.push(`${file}:${i + 1}: ${line.trim()}`);
     });
   }

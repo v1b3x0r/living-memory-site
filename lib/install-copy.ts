@@ -23,10 +23,12 @@ export const KEEP_PATH = "/living-memory/keep/";
  * worlds cannot tell which one answered — we watched one search the wrong
  * world about fourteen times. Distinct names per rail are the fix.
  *
- * RENAMED 2026-09-02 from lm-room / lm-cloud / lm-local. The old set fixed less
+ * RENAMED 2026-09-02 from lm-room / lm-cloud / lm-local. [retired-name-ok] The old
+ * set fixed less
  * than it looked: it distinguished the three RAILS but not two places on the
  * same rail, so a person who connected two rooms was back to two servers called
- * lm-room and an agent with no way to tell them apart. And it was not even
+ * lm-room [retired-name-ok] and an agent with no way to tell them apart. And it
+ * was not even
  * consistent — two names carried the lm- prefix and the third did not.
  *
  * The name is now the KIND, and the kind is a prefix a person extends when they
