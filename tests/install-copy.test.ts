@@ -99,11 +99,14 @@ test("no surface retypes a retired server name", async () => {
    *
    * Backticks are the one quote that survives a line ending; ' and " do not, so they are reset at
    * the end of each line rather than leaking a mismatched quote into the rest of the file. */
-  const codeOnly = (source: string, hasComments: boolean): string[] => {
-    if (!hasComments) return source.split("\n");
+  const codeOnly = (
+    source: string,
+    hasComments: boolean,
+  ): { lines: string[]; lost: boolean } => {
+    if (!hasComments) return { lines: source.split("\n"), lost: false };
     let inBlock = false;
     let inString: string | null = null;
-    return source.split("\n").map((line) => {
+    const lines = source.split("\n").map((line) => {
       let out = "";
       for (let i = 0; i < line.length; i++) {
         const ch = line[i];
@@ -123,11 +126,23 @@ test("no surface retypes a retired server name", async () => {
       if (inString && inString !== "`") inString = null;
       return out;
     });
+    /* THE SENTINEL, and it answers a finding rather than dodging it — Codex asked for regex
+     * literals to be recognised, because `/[/*]/` reads as a block-comment opener and everything
+     * after it is swallowed. That construct appears nowhere in this repository, and telling a
+     * regex literal from a division reliably is a job for a JavaScript lexer: the guard would end
+     * up more complicated than the copy it guards, which is its own kind of risk.
+     *
+     * So this catches the CONSEQUENCE instead of enumerating causes. A file that ends while the
+     * scanner still believes it is inside a block comment is a file the scanner lost track of —
+     * whatever confused it — and the swallowed remainder is exactly the silent miss the finding
+     * describes. It is reported as an offender, so the guard fails loudly and names the file
+     * rather than passing on a half-read one. */
+    return { lines, lost: inBlock };
   };
 
   /* The guard's own guard: a rule that silently stopped matching would leave the suite green and
    * the product unprotected, which is the failure this whole test was written about. */
-  const probe = codeOnly(
+  const { lines: probe } = codeOnly(
     [
       'const a = "Name it lm-cloud";',
       "{/* RENAMED from",
@@ -150,6 +165,10 @@ test("no surface retypes a retired server name", async () => {
     RETIRED.test(probe[4]),
     "a URL earlier on the line does not hide what follows it",
   );
+  assert.ok(
+    codeOnly("/* opened and never closed\nName it lm-cloud", true).lost,
+    "a file the scanner lost track of is reported rather than silently half-read",
+  );
 
   const walk = async (dir: string, match: RegExp): Promise<string[]> => {
     const out: string[] = [];
@@ -168,12 +187,20 @@ test("no surface retypes a retired server name", async () => {
       ),
     )
   ).flat();
-  const guides = await walk("public/skills", /\.md$/);
+  /* Everything published under public/skills is an install surface somebody reads: SKILL.md is
+   * what AGENT_GUIDE_PATH points at, and agents/openai.yaml carries the default_prompt a user is
+   * shown. Neither holds a rename history to protect, so both are read whole. */
+  const guides = await walk("public/skills", /\.(md|ya?ml)$/);
 
   const offenders: string[] = [];
   for (const file of [...sources, ...guides]) {
     const raw = await readFile(file, "utf8");
-    codeOnly(raw, !file.endsWith(".md")).forEach((line, i) => {
+    const { lines, lost } = codeOnly(raw, /\.(tsx?|mjs)$/.test(file));
+    if (lost)
+      offenders.push(
+        `${file}: scanner ended inside a comment — this file was not checked`,
+      );
+    lines.forEach((line, i) => {
       if (RETIRED.test(line))
         offenders.push(`${file}:${i + 1}: ${line.trim()}`);
     });
