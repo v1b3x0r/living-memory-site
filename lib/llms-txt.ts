@@ -1,6 +1,12 @@
 // llms-txt.ts — the agent-facing index of this product (served at /llms.txt).
 // Same doctrine as the package README: state what exists, what does not, and
 // how it fails. An agent reading this should be able to act without the HTML.
+//
+// The server name is READ from SERVER_NAMES, never retyped. This file and the
+// installer are two public surfaces describing the same install; a name typed
+// twice drifts, and an agent following one ends up with a server the other
+// cannot talk about.
+import { SERVER_NAMES } from "./install-copy.ts";
 
 export const LLMS_TXT = `# Living Memory
 
@@ -20,8 +26,10 @@ inactive rooms are eventually forgotten, and a room does not migrate into
 a paid world.
 A **world** is the same place that does not end: what was left in it is still
 there days later, and the timeline keeps walking whether or not anyone is in it.
-A world is $9/month and is tied to a sign-in. The difference is lifetime, not
-capability — a room can do everything a world can, while it stays in use.
+A world is $9/month and is tied to a sign-in. The difference is lifetime and
+budget, not capability: a room has every tool a world has, and is metered —
+about 16 memories in total, 300 operations each day, and 8 live handoff
+notes. A world is unmetered.
 
 ## The tools, and which surface has them
 
@@ -54,7 +62,7 @@ first continuity check.
 
 - npm package: @nature-labs/lme-mcp — https://www.npmjs.com/package/@nature-labs/lme-mcp
 - Claude Code:
-  claude mcp add living-memory -s user --env LME_SNAPSHOT=$HOME/.living-memory/brain.json -- npx -y @nature-labs/lme-mcp
+  claude mcp add ${SERVER_NAMES.local} -s user --env LME_SNAPSHOT=$HOME/.living-memory/brain.json -- npx -y @nature-labs/lme-mcp
 - Any stdio MCP client: command "npx", args ["-y", "@nature-labs/lme-mcp"]
 - The package README is written to be read by a coding agent. If you are an
   agent: read it first, then install, run the bundled smoke test, and report
@@ -73,9 +81,12 @@ first continuity check.
   it goes unused; any successful use keeps it alive. Once forgotten it answers
   410, and its data is then deleted — memories and handoff notes alike. Nothing
   belonging to a room survives it. Rate-limited per address.
-- A room differs from a world by how long it lasts, not by what it can do: both
-  share memory, hand work between agents, and record which route each note
-  arrived through. A world is what does not end.
+- A room differs from a world by how long it lasts and how much it holds, not by
+  which tools it has: both share memory, hand work between agents, and record
+  which route each note arrived through. A room is metered — roughly 16
+  memories in total, 300 operations each day (a search counts, it embeds) and 8
+  live notes — and answers 429 once a bound is reached. A world is what does not
+  end, and is unmetered.
 
 ## A world of your own
 
@@ -87,15 +98,27 @@ first continuity check.
 
 ## Known limitations
 
-None right now. The entry about Claude on the web not opening a trial room
+A free room that reaches either of its bounds — the size budget or the daily
+operation budget — currently refuses reads and clean-up as well as writes, so
+a full room answers 429 to memory_search and memory_forget too, not only to
+memory_add. Posted 2026-08-29. The daily budget clears at midnight UTC; a room
+stuck on the size bound cannot be emptied from inside, so mail us. This section
+said "None right now" while that was already true and documented above, which
+is worse than saying nothing: a summariser quoting this heading reports a
+service with no known limitations.
+
+The entry about Claude on the web not opening a trial room
 came down on 2026-08-23 (the cause was our own edge bot-protection), and the
-installer's Claude tab offers a room since 2026-08-27. What stops working gets
-a dated entry at https://viibe.to/living-memory/known-issues/ and comes down
-when it stops being true.
+installer's
+Claude tab offers a room since 2026-08-27. What stops working gets a dated
+entry at https://viibe.to/living-memory/known-issues/ and comes down when it
+stops being true.
 
 ## Links
 
-- Site: https://viibe.to/living-memory/
+- Launcher (the current entrance — a newer web experience than this site, and
+  where a room or a world is started today): https://living-memory.app/
+- Site (this one, the original): https://viibe.to/living-memory/
 - Known issues (what does not work today, dated): https://viibe.to/living-memory/known-issues/
 - Latest write-up: https://viibe.to/living-memory/whats-new/agents-hand-work/
 - Engine source: https://github.com/v1b3x0r/living-memory-engine

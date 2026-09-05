@@ -30,7 +30,11 @@ export const landing = {
       { label: "How it works", href: "#installer" },
       { label: "Pricing", href: "#pricing" },
     ],
-    cta: "Open a room — free",
+    // NOT the same button as the hero's, and no longer the same job. The hero
+    // still opens a room here, because this page still mints them. The nav's
+    // primary control is now the crossing to the current entrance — founder's
+    // call, 2026-09-04: one button, the one in the top-right corner.
+    cta: "Open Launcher",
   },
 
   hero: {
@@ -203,7 +207,7 @@ export const landing = {
       lines: [
         "A place to meet.",
         "Exchange and go.",
-        "Lasts while you use it.",
+        "Stays 21 days from your last visit.",
         "Then it's gone.",
       ],
     },
@@ -244,6 +248,20 @@ export const landing = {
     // Live-note caps (8 per room, 32 per world) are left out on purpose: the
     // 32 has never been watched in production, and half a proven row is worse
     // than no row.
+    //
+    // "How much fits" IS proven on both sides, which is why it ships where the
+    // note caps do not (added 2026-08-29 after the Chiang Mai meetup, where a
+    // free room was filled in the field). It does not reopen the
+    // lifetime-not-capability rule at the top of this file: nothing is gated,
+    // the free tier is METERED. ONS_MAX_BRAIN_BYTES is 1 MB, but say 16
+    // memories — a 1024-dim embedding costs ~60 KB per entry whatever the text
+    // says, so a count is what a reader actually hits, and "1 MB" is a number
+    // nobody can plan against. 300 ops/day is ONS_MAX_OPS_PER_DAY; searches
+    // count, because they embed.
+    //
+    // DO NOT soften this into "fills up gradually" while a full room still
+    // 429s every tool, reads included. That is a live bug, not a limit, and
+    // copy must not promise a graceful degrade the server does not perform.
     compare: {
       heading: "Compare",
       columns: [
@@ -255,6 +273,17 @@ export const landing = {
         {
           label: "How long it lasts",
           cells: ["While you use it, then gone", "As long as you keep it"],
+        },
+        {
+          label: "How much fits",
+          // "a day" attaches to operations, not to memories — but a comma list
+          // invites reading it across both, and NotebookLM did exactly that on
+          // 2026-08-29: it summarised the free room as "16 ความจำต่อวัน", 16
+          // memories PER DAY. That misreads generously, which is the dangerous
+          // direction: someone builds a week of work on a number that is really
+          // a lifetime cap, then hits it and the room 429s reads too. The two
+          // bounds are different kinds of thing and now say so.
+          cells: ["About 16 memories in total, and 300 operations each day", "Unmetered"],
         },
         {
           label: "A handoff note can live",
@@ -282,7 +311,7 @@ export const landing = {
 
   knownIssues: {
     heading: "Known issues",
-    item: "Nothing open right now. The last entry — Claude (web) couldn't open a room — was resolved on 2026-08-23; rooms now work from every client we list.",
+    item: "A free room that reaches one of its limits refuses reads and clean-up too, not just writes — posted 2026-08-29. The daily budget clears at midnight UTC; if a room is stuck, mail us before trying anything else.",
     tell: "Tell us about other issues:",
     all: "All known issues →",
   },

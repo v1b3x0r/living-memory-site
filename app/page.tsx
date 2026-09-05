@@ -4,6 +4,7 @@ import { Hero } from "../components/Hero";
 import { HowAWorldWorks } from "../components/HowAWorldWorks";
 import { Installer } from "../components/Installer";
 import { KnownIssuesStrip } from "../components/KnownIssuesStrip";
+import { LauncherBridge } from "../components/LauncherBridge";
 import { Pricing } from "../components/Pricing";
 import { Telemetry } from "../components/Telemetry";
 import { WebMcpTools } from "../components/WebMcpTools";
@@ -24,6 +25,11 @@ export default function Home() {
       {/* WebMCP: the same room creator, offered to visiting agents. */}
       <WebMcpTools />
       <WorldEnv />
+      {/* Above the hero, because the hero is this site's own entrance and the
+          question the bridge answers comes first: which of the two entrances
+          did you just walk through? This page is still the most-landed-on URL
+          of the whole product, so it is the single most important crossing. */}
+      <LauncherBridge source="legacy-landing" />
       <Hero />
       <main id="main-content">
         {/* WS2 (2026-08-26): the room creator IS the primary action — the
