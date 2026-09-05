@@ -126,9 +126,11 @@ first continuity check.
   it goes unused; any successful use keeps it alive. Once forgotten it answers
   410, and its data is then deleted — memories and handoff notes alike. Nothing
   belonging to a room survives it. Rate-limited per address.
-- A room differs from a world by how long it lasts and how much it holds, not by
-  which tools it has: both share memory, hand work between agents, and record
-  which route each note arrived through. A room is metered — roughly 16
+- A room differs from a world in how long it lasts, how much it holds, and the
+  two things that need an owner: it has no keys to mint, and no human to raise
+  to. Memory and handoff are the same in both — they share memory, hand work
+  between agents, and record which route each note arrived through. A room is
+  metered — roughly 16
   memories in total, 300 operations each day (a search counts, it embeds) and 8
   live notes — and answers 429 once a bound is reached. A world is what does not
   end, and is unmetered.

@@ -16,6 +16,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 import { LLMS_TXT, WORLD_TOOLS, ROOM_TOOLS } from "../lib/llms-txt.ts";
 
 test("every tool the world offers is named in the document", () => {
@@ -48,4 +49,22 @@ test("the document does not claim a room and a world differ only in lifetime and
  * If a number in words ever reappears next to "tools", it is a number nobody will update. */
 test("no spelled-out tool count is written down to go stale", () => {
   assert.doesNotMatch(LLMS_TXT, /\b(six|seven|eight|nine|ten|eleven|twelve|thirteen) tools\b/);
+});
+
+/* THE GUIDE llms.txt SENDS EVERY AGENT TO. Codex, P2 on PR #9: adding world_raise to the rendered
+ * list while public/skills/living-memory/SKILL.md still enumerated eleven tools left the document
+ * that actually teaches an agent how to behave one tool short — so an agent would meet escalation
+ * with no guidance about it at all. Two files, one inventory; this is the contract between them. */
+test("the operating guide names every tool an agent can meet", async () => {
+  const skill = await readFile(new URL("../public/skills/living-memory/SKILL.md", import.meta.url), "utf8");
+  for (const tool of WORLD_TOOLS)
+    assert.match(skill, new RegExp(`\\b${tool.name}\\b`), `${tool.name} missing from SKILL.md`);
+});
+
+/* Codex, P2 on PR #9, and the sharper half: the parity claim survived in a SECOND sentence —
+ * "not by\nwhich tools it has" — because the guard above was written against the exact words of
+ * the first one. A negative assertion is only as wide as the phrasing it imagined. */
+test("no sentence anywhere still claims a room and a world have the same tools", () => {
+  assert.doesNotMatch(LLMS_TXT, /not by\s+which tools it has/);
+  assert.doesNotMatch(LLMS_TXT, /same tools/);
 });
