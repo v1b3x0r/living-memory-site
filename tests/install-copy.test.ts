@@ -83,22 +83,37 @@ test("the public agent index teaches the same local server name as the installer
 const RETIRED = /lm-(room|cloud|local)/;
 const ALLOW = "[retired-name-ok]";
 
+/* THE WHOLE RULE AS ONE NAMED FUNCTION, so the self-check below can run the real thing.
+ * The previous probe asserted that a concatenated string was truthy — which it always is — so it
+ * would have stayed green with the exemption disconnected entirely. Codex caught it as P2 on
+ * round six of PR #7, and it is the same mistake as a test that reimplements the logic it claims
+ * to test: it proves the author's intent, not the code. */
+const isOffender = (line: string) =>
+  RETIRED.test(line) && !line.includes(ALLOW);
+
 test("no surface retypes a retired server name", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
 
   /* The guard's own guard: a rule that silently stopped matching would leave the suite green and
    * the product unprotected, which is the failure this test exists to prevent. */
+  /* The guard's own guard, running the REAL predicate. Both directions, because an exemption that
+   * stops exempting is as broken as a match that stops matching — it just fails loudly instead of
+   * quietly. */
   assert.ok(
-    RETIRED.test('<a href="https://x.test">Name it lm-cloud</a>'),
+    isOffender('<a href="https://x.test">Name it lm-cloud</a>'),
     "copy is caught",
   );
   assert.ok(
-    RETIRED.test("const re = /[/*]/; // lm-room"),
+    isOffender("const re = /[/*]/; // lm-room"),
     "no syntax can hide a name",
   );
   assert.ok(
-    " * RENAMED from lm-room " + ALLOW,
-    "history is exempt by marker, not by guesswork",
+    !isOffender(" * RENAMED from lm-room " + ALLOW),
+    "a marked line is exempt",
+  );
+  assert.ok(
+    !isOffender("const name = SERVER_NAMES.cloud;"),
+    "the current name is not a match",
   );
 
   const walk = async (dir: string, match: RegExp): Promise<string[]> => {
@@ -126,8 +141,7 @@ test("no surface retypes a retired server name", async () => {
   for (const file of files) {
     const raw = await readFile(file, "utf8");
     raw.split("\n").forEach((line, i) => {
-      if (RETIRED.test(line) && !line.includes(ALLOW))
-        offenders.push(`${file}:${i + 1}: ${line.trim()}`);
+      if (isOffender(line)) offenders.push(`${file}:${i + 1}: ${line.trim()}`);
     });
   }
 
