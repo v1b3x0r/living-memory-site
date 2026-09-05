@@ -63,53 +63,93 @@ test("the public agent index teaches the same local server name as the installer
  * guard in the suite was `doesNotMatch(html, /lm-room/)` on the LANDING page — one name out of
  * three, on one surface out of many. A partial guard reads as a guard.
  *
- * So this asserts over SOURCE rather than over one rendered page: a retired name cannot be typed
- * anywhere a person will read it, whichever route renders it and whether or not that route is
- * reachable without a receipt.
+ * So this asserts over SOURCE: a retired name cannot be typed anywhere a person will read it,
+ * whichever route renders it and whether or not that route is reachable without a receipt.
  *
- * THE EXEMPTION IS COMMENTS, NOT FILES — Codex raised the first version as P2 on PR #7 and was
- * right. Exempting lib/install-copy.ts wholesale would have left the module that GENERATES the
- * installer steps and agent prompts unguarded, which is the largest copy surface in the repo and
- * exactly the kind of place the next miss would hide. What has to stay legal is the history: that
- * file documents which names it replaced, and a rename note has to be allowed to name them. So a
- * retired name is permitted only on a comment line, in any file, and a comment line here is one
- * whose first non-space character opens or continues a comment. That is a heuristic and it is
- * stated as one: it reads this repository's actual comment style rather than parsing TypeScript. */
+ * WHAT COUNTS AS "A PERSON WILL READ IT" took two rounds of review to get right, and both
+ * corrections came from Codex on PR #7:
+ *
+ * · THE EXEMPTION IS COMMENTS, NOT FILES. Exempting lib/install-copy.ts wholesale would have left
+ *   the module that GENERATES installer steps and agent prompts unguarded — the largest copy
+ *   surface in the repo, and exactly where the next miss would hide. What has to stay legal is the
+ *   HISTORY: a rename note has to be able to name what it replaced.
+ *
+ * · SO THE COMMENT TEST TRACKS BLOCK STATE INSTEAD OF GUESSING. The first version matched lines
+ *   starting with //, slash-star or star, which is wrong for JSX: `{/*` opens a comment whose
+ *   CONTINUATION lines begin with ordinary prose (app/layout.tsx:126 and app/page.tsx:29 are both
+ *   like this today). A rename note written inside one would have been read as product copy and
+ *   failed CI for nothing. Comments are stripped with a scanner carrying state across lines, and
+ *   the match runs on what is left.
+ *
+ * · MARKDOWN IS SCANNED WHOLE. public/skills/living-memory/SKILL.md is a live install surface —
+ *   AGENT_GUIDE_PATH points at it and agents are told to read it first — and it has no comment
+ *   syntax, so every line of it is copy. */
 test("no surface retypes a retired server name", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
   const RETIRED = /lm-(room|cloud|local)/;
-  const isComment = (line: string) => /^\s*(\/\/|\/\*|\*)/.test(line);
+
+  /* Strip comments, carrying block state across lines, and return what a reader would see. */
+  const codeOnly = (source: string, hasComments: boolean): string[] => {
+    if (!hasComments) return source.split("\n");
+    let inBlock = false;
+    return source.split("\n").map((line) => {
+      let out = "";
+      for (let i = 0; i < line.length; i++) {
+        if (inBlock) {
+          if (line.startsWith("*/", i)) ((inBlock = false), i++);
+        } else if (line.startsWith("/*", i)) ((inBlock = true), i++);
+        else if (line.startsWith("//", i)) break;
+        else out += line[i];
+      }
+      return out;
+    });
+  };
 
   /* The guard's own guard: a rule that silently stopped matching would leave the suite green and
    * the product unprotected, which is the failure this whole test was written about. */
+  const probe = codeOnly(
+    [
+      'const a = "Name it lm-cloud";',
+      "{/* RENAMED from",
+      "   lm-room, which is history */}",
+      'const b = "lm-local";',
+    ].join("\n"),
+    true,
+  );
+  assert.ok(RETIRED.test(probe[0]), "a retired name in a string is copy");
   assert.ok(
-    RETIRED.test("Name it lm-cloud so you") &&
-      !isComment("Name it lm-cloud so you"),
+    !RETIRED.test(probe[2]),
+    "a JSX comment's continuation line is history, not copy",
   );
   assert.ok(
-    isComment(" * RENAMED 2026-09-02 from lm-room / lm-cloud / lm-local."),
+    RETIRED.test(probe[3]),
+    "code after a closed comment is copy again",
   );
 
-  const walk = async (dir: string): Promise<string[]> => {
+  const walk = async (dir: string, match: RegExp): Promise<string[]> => {
     const out: string[] = [];
     for (const entry of await readdir(dir, { withFileTypes: true })) {
       const path = `${dir}/${entry.name}`;
-      if (entry.isDirectory()) out.push(...(await walk(path)));
-      else if (/\.(tsx?|mjs)$/.test(entry.name)) out.push(path);
+      if (entry.isDirectory()) out.push(...(await walk(path, match)));
+      else if (match.test(entry.name)) out.push(path);
     }
     return out;
   };
 
-  const files = (
+  const sources = (
     await Promise.all(
-      ["app", "components", "lib", "content"].map((d) => walk(d)),
+      ["app", "components", "lib", "content"].map((d) =>
+        walk(d, /\.(tsx?|mjs)$/),
+      ),
     )
   ).flat();
+  const guides = await walk("public/skills", /\.md$/);
+
   const offenders: string[] = [];
-  for (const file of files) {
-    const source = await readFile(file, "utf8");
-    source.split("\n").forEach((line, i) => {
-      if (RETIRED.test(line) && !isComment(line))
+  for (const file of [...sources, ...guides]) {
+    const raw = await readFile(file, "utf8");
+    codeOnly(raw, !file.endsWith(".md")).forEach((line, i) => {
+      if (RETIRED.test(line))
         offenders.push(`${file}:${i + 1}: ${line.trim()}`);
     });
   }
