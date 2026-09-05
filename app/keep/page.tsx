@@ -19,7 +19,11 @@ import {
 import { BASE_PATH } from "../../lib/base-path";
 import { rcUserIdFromSub } from "../../lib/rc-user-id";
 import { keepCheckoutUrl } from "../../lib/billing";
-import { AGENT_GUIDE_PATH, HOSTED_MCP_URL } from "../../lib/install-copy";
+import {
+  AGENT_GUIDE_PATH,
+  HOSTED_MCP_URL,
+  SERVER_NAMES,
+} from "../../lib/install-copy";
 import { CopyButton } from "../../components/CopyButton";
 import { LmeMark } from "../../components/LmeMark";
 import { AuthAvatar } from "../../components/AuthAvatar";
@@ -369,8 +373,9 @@ export default function KeepPage() {
               <CopyButton text={HOSTED_MCP_URL} label="Copy URL" />
             </p>
             <p>
-              Use this URL from now on. Name it <strong>lm-cloud</strong> so you
-              can tell it apart from any other world you have added.
+              Use this URL from now on. Name it{" "}
+              <strong>{SERVER_NAMES.cloud}</strong> so you can tell it apart from
+              any other world you have added.
             </p>
             <p>
               Your trial room is separate. Its memories stay there and expire
