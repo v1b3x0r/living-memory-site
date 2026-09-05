@@ -88,19 +88,39 @@ test("no surface retypes a retired server name", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
   const RETIRED = /lm-(room|cloud|local)/;
 
-  /* Strip comments, carrying block state across lines, and return what a reader would see. */
+  /* Strip comments and keep everything else, carrying state across lines.
+   *
+   * STRINGS ARE COPY, so their contents stay — and their contents are also why the scanner has to
+   * know it is inside one. `https://example.test` contains `//`, and a version of this that did
+   * not track quoting read that as a line comment and threw away the rest of the line, taking a
+   * retired name sitting after a URL with it. Verified by running it, not reasoned about: given
+   * `<a href="https://example.test">Name it lm-cloud</a>` the old scanner returned
+   * `<a href="https:` and the guard went green. Codex raised it as P2 on PR #7, round three.
+   *
+   * Backticks are the one quote that survives a line ending; ' and " do not, so they are reset at
+   * the end of each line rather than leaking a mismatched quote into the rest of the file. */
   const codeOnly = (source: string, hasComments: boolean): string[] => {
     if (!hasComments) return source.split("\n");
     let inBlock = false;
+    let inString: string | null = null;
     return source.split("\n").map((line) => {
       let out = "";
       for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
         if (inBlock) {
           if (line.startsWith("*/", i)) ((inBlock = false), i++);
+        } else if (inString) {
+          out += ch;
+          if (ch === "\\") out += line[++i] ?? "";
+          else if (ch === inString) inString = null;
         } else if (line.startsWith("/*", i)) ((inBlock = true), i++);
         else if (line.startsWith("//", i)) break;
-        else out += line[i];
+        else {
+          if (ch === "'" || ch === '"' || ch === "`") inString = ch;
+          out += ch;
+        }
       }
+      if (inString && inString !== "`") inString = null;
       return out;
     });
   };
@@ -113,6 +133,7 @@ test("no surface retypes a retired server name", async () => {
       "{/* RENAMED from",
       "   lm-room, which is history */}",
       'const b = "lm-local";',
+      '<a href="https://example.test">Name it lm-cloud</a>',
     ].join("\n"),
     true,
   );
@@ -124,6 +145,10 @@ test("no surface retypes a retired server name", async () => {
   assert.ok(
     RETIRED.test(probe[3]),
     "code after a closed comment is copy again",
+  );
+  assert.ok(
+    RETIRED.test(probe[4]),
+    "a URL earlier on the line does not hide what follows it",
   );
 
   const walk = async (dir: string, match: RegExp): Promise<string[]> => {
