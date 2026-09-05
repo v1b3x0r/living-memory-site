@@ -65,12 +65,30 @@ test("the public agent index teaches the same local server name as the installer
  *
  * So this asserts over SOURCE rather than over one rendered page: a retired name cannot be typed
  * anywhere a person will read it, whichever route renders it and whether or not that route is
- * reachable without a receipt. lib/install-copy.ts is exempt because it is where the rename is
- * DOCUMENTED — the history has to be allowed to say what it replaced. */
+ * reachable without a receipt.
+ *
+ * THE EXEMPTION IS COMMENTS, NOT FILES — Codex raised the first version as P2 on PR #7 and was
+ * right. Exempting lib/install-copy.ts wholesale would have left the module that GENERATES the
+ * installer steps and agent prompts unguarded, which is the largest copy surface in the repo and
+ * exactly the kind of place the next miss would hide. What has to stay legal is the history: that
+ * file documents which names it replaced, and a rename note has to be allowed to name them. So a
+ * retired name is permitted only on a comment line, in any file, and a comment line here is one
+ * whose first non-space character opens or continues a comment. That is a heuristic and it is
+ * stated as one: it reads this repository's actual comment style rather than parsing TypeScript. */
 test("no surface retypes a retired server name", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
   const RETIRED = /lm-(room|cloud|local)/;
-  const OWNS_THE_HISTORY = "lib/install-copy.ts";
+  const isComment = (line: string) => /^\s*(\/\/|\/\*|\*)/.test(line);
+
+  /* The guard's own guard: a rule that silently stopped matching would leave the suite green and
+   * the product unprotected, which is the failure this whole test was written about. */
+  assert.ok(
+    RETIRED.test("Name it lm-cloud so you") &&
+      !isComment("Name it lm-cloud so you"),
+  );
+  assert.ok(
+    isComment(" * RENAMED 2026-09-02 from lm-room / lm-cloud / lm-local."),
+  );
 
   const walk = async (dir: string): Promise<string[]> => {
     const out: string[] = [];
@@ -89,10 +107,9 @@ test("no surface retypes a retired server name", async () => {
   ).flat();
   const offenders: string[] = [];
   for (const file of files) {
-    if (file === OWNS_THE_HISTORY) continue;
     const source = await readFile(file, "utf8");
     source.split("\n").forEach((line, i) => {
-      if (RETIRED.test(line))
+      if (RETIRED.test(line) && !isComment(line))
         offenders.push(`${file}:${i + 1}: ${line.trim()}`);
     });
   }
