@@ -19,12 +19,20 @@ import {
 import { BASE_PATH } from "../../lib/base-path";
 import { rcUserIdFromSub } from "../../lib/rc-user-id";
 import { keepCheckoutUrl } from "../../lib/billing";
-import { AGENT_GUIDE_PATH, HOSTED_MCP_URL } from "../../lib/install-copy";
+import {
+  AGENT_GUIDE_PATH,
+  HOSTED_MCP_URL,
+  SERVER_NAMES,
+} from "../../lib/install-copy";
 import { CopyButton } from "../../components/CopyButton";
 import { LmeMark } from "../../components/LmeMark";
 import { AuthAvatar } from "../../components/AuthAvatar";
 import { DeleteWorld } from "../../components/DeleteWorld";
-import { fetchWorldStatus, type Billing, type WorldStatus } from "../../lib/world-status";
+import {
+  fetchWorldStatus,
+  type Billing,
+  type WorldStatus,
+} from "../../lib/world-status";
 import {
   GitHubMark,
   GoogleMark,
@@ -54,8 +62,10 @@ function PlanSummary() {
       <ul>
         <li>A persistent memory world tied to your email</li>
         <li>Six memory tools + a private handoff bus between your agents</li>
-        <li>Recurring monthly billing · cancel anytime — access runs to the end
-          of the paid period</li>
+        <li>
+          Recurring monthly billing · cancel anytime — access runs to the end of
+          the paid period
+        </li>
       </ul>
       <p className="keep-plan__trust">
         Payment is handled by RevenueCat and Stripe — your card details never
@@ -164,7 +174,8 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
                   chargeback starts, and the customer is the one who has to
                   recognise it months later. */}
               <p className="keep-billing__fine">
-                Charges appear on your statement as <strong>LIVING-MEMORY</strong>.
+                Charges appear on your statement as{" "}
+                <strong>LIVING-MEMORY</strong>.
               </p>
             </>
           ) : (
@@ -184,8 +195,8 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
         // comped user hunting for a receipt email that was never sent.
         <p className="keep-billing__fine">
           We have no payment details to show for this world right now — either
-          nothing was charged for it, or we could not reach billing a
-          moment ago. Your world is unaffected either way. If you do have a
+          nothing was charged for it, or we could not reach billing a moment
+          ago. Your world is unaffected either way. If you do have a
           subscription, the link in your receipt email manages it; otherwise
           write to <a href="mailto:support@viibe.to">support@viibe.to</a>.
         </p>
@@ -223,7 +234,11 @@ export default function KeepPage() {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const tokenType = params.get("stytch_token_type");
-    if (!token || (tokenType !== "discovery" && tokenType !== "discovery_oauth")) return;
+    if (
+      !token ||
+      (tokenType !== "discovery" && tokenType !== "discovery_oauth")
+    )
+      return;
     if (authenticateStarted) return;
     authenticateStarted = true;
     setPhase("authenticating");
@@ -232,7 +247,9 @@ export default function KeepPage() {
       try {
         const auth =
           tokenType === "discovery_oauth"
-            ? await stytch.oauth.discovery.authenticate({ discovery_oauth_token: token })
+            ? await stytch.oauth.discovery.authenticate({
+                discovery_oauth_token: token,
+              })
             : await stytch.magicLinks.discovery.authenticate({
                 discovery_magic_links_token: token,
               });
@@ -322,12 +339,16 @@ export default function KeepPage() {
       const s = await fetchWorldStatus(jwt);
       if (!live) return;
       setStatus(s);
-      const waiting = purchased && s?.entitled !== true && ++tries < ACTIVATION_ATTEMPTS;
+      const waiting =
+        purchased && s?.entitled !== true && ++tries < ACTIVATION_ATTEMPTS;
       if (waiting) timer = setTimeout(read, ACTIVATION_POLL_MS);
     };
     void read();
 
-    return () => { live = false; if (timer) clearTimeout(timer); };
+    return () => {
+      live = false;
+      if (timer) clearTimeout(timer);
+    };
   }, [session, stytch, purchased]);
 
   return (
@@ -363,14 +384,17 @@ export default function KeepPage() {
           <div aria-live="polite" className="keep-return">
             {/* h1, not h2: with the storefront heading suppressed this is the
                 page's only top-level heading. */}
-            <h1 className="keep-return__title">Your permanent world is ready.</h1>
+            <h1 className="keep-return__title">
+              Your permanent world is ready.
+            </h1>
             <p className="keep-return__url">
               <code>{HOSTED_MCP_URL}</code>
               <CopyButton text={HOSTED_MCP_URL} label="Copy URL" />
             </p>
             <p>
-              Use this URL from now on. Name it <strong>lm-cloud</strong> so you
-              can tell it apart from any other world you have added.
+              Use this URL from now on. Name it{" "}
+              <strong>{SERVER_NAMES.cloud}</strong> so you can tell it apart
+              from any other world you have added.
             </p>
             <p>
               Your trial room is separate. Its memories stay there and expire
@@ -384,20 +408,23 @@ export default function KeepPage() {
               </li>
             </ol>
             <p>
-              Agents that cannot sign in — an editor, a CLI, a coding agent — get
-              a key each. Ask any agent already signed in to mint one, or see the{" "}
-              <a href={AGENT_GUIDE_PATH}>setup guide</a>.
+              Agents that cannot sign in — an editor, a CLI, a coding agent —
+              get a key each. Ask any agent already signed in to mint one, or
+              see the <a href={AGENT_GUIDE_PATH}>setup guide</a>.
             </p>
             <p>
               Activation can take up to a minute. Still locked out after a few
-              minutes? <a href={`${BASE_PATH}/support#billing`}>Billing support</a>.
+              minutes?{" "}
+              <a href={`${BASE_PATH}/support#billing`}>Billing support</a>.
             </p>
             {/* Someone who just paid is the likeliest person to want out again,
                 and this branch used to end here — the self-service control was
                 a sign-out and a sign-in away. Rendered only once entitlement
                 has actually landed: a billing panel shown during the
                 activation minute would report nothing and read as a failure. */}
-            {status?.entitled === true && <BillingPanel billing={status.billing} />}
+            {status?.entitled === true && (
+              <BillingPanel billing={status.billing} />
+            )}
           </div>
         ) : !isInitialized ? (
           <p aria-live="polite">Loading…</p>
@@ -418,7 +445,8 @@ export default function KeepPage() {
                   <CopyButton text={HOSTED_MCP_URL} label="Copy URL" />
                 </p>
                 <p>
-                  Sign in with this same account from any client that supports it.
+                  Sign in with this same account from any client that supports
+                  it.
                 </p>
                 {/* Which world is this? It was answerable only before paying: the
                     signed-in line lived in the checkout branch, so the moment
@@ -426,8 +454,8 @@ export default function KeepPage() {
                     they were looking at — with a delete button further down. */}
                 {accountEmail && (
                   <p className="keep-account" aria-label="Signed-in account">
-                    This world belongs to <strong>{accountEmail}</strong>. Signing
-                    in with a different address opens a different world.
+                    This world belongs to <strong>{accountEmail}</strong>.
+                    Signing in with a different address opens a different world.
                   </p>
                 )}
                 <BillingPanel billing={status?.billing ?? null} />
@@ -446,7 +474,9 @@ export default function KeepPage() {
                     read actually returned false — an unreachable billing API must
                     never render as "not subscribed". */}
                 {status?.entitled === false && (
-                  <p className="keep-nosub">No active subscription on this sign-in.</p>
+                  <p className="keep-nosub">
+                    No active subscription on this sign-in.
+                  </p>
                 )}
                 {checkoutUrl ? (
                   <a
@@ -458,8 +488,8 @@ export default function KeepPage() {
                   </a>
                 ) : (
                   <p aria-live="polite">
-                    <strong>Checkout opens soon.</strong> We&apos;re finalizing live
-                    payment activation — email{" "}
+                    <strong>Checkout opens soon.</strong> We&apos;re finalizing
+                    live payment activation — email{" "}
                     <a href="mailto:support@viibe.to">support@viibe.to</a> and
                     we&apos;ll tell you the moment it&apos;s open.
                   </p>
@@ -562,7 +592,9 @@ export default function KeepPage() {
               </div>
             )}
 
-            {phase === "authenticating" && <p aria-live="polite">Signing you in…</p>}
+            {phase === "authenticating" && (
+              <p aria-live="polite">Signing you in…</p>
+            )}
 
             {phase === "error" && (
               <p className="keep-error" role="alert">
