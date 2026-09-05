@@ -1,6 +1,6 @@
 ---
 name: living-memory
-description: Operate and explain Living Memory Engine (LME) safely. Use when an agent sees LME memory_add, memory_search, memory_state, memory_forget, handoff_post, handoff_list, handoff_read, world_list, client_mint, client_list, or client_revoke tools; when a human asks to install or connect an LME MCP server; or when guiding a first continuity check across sessions, clients, or agents.
+description: Operate and explain Living Memory Engine (LME) safely. Use when an agent sees LME memory_add, memory_search, memory_state, memory_forget, handoff_post, handoff_list, handoff_read, world_list, client_mint, client_list, client_revoke, or world_raise tools; when a human asks to install or connect an LME MCP server; or when guiding a first continuity check across sessions, clients, or agents.
 ---
 
 # Living Memory
@@ -12,9 +12,10 @@ Treat the human as the continuity anchor. Agents visit; the memory world persist
 1. Inspect the available tool names.
 2. Keep these surfaces distinct:
    - Four memory tools: `memory_add`, `memory_search`, `memory_state`, and `memory_forget`.
-   - Authenticated Living Memory may also expose the handoff mailbox (`handoff_post`, `handoff_list`, `handoff_read`), world discovery (`world_list`), and the client keys (`client_mint`, `client_list`, `client_revoke`).
+   - Authenticated Living Memory may also expose the handoff mailbox (`handoff_post`, `handoff_list`, `handoff_read`), world discovery (`world_list`), the client keys (`client_mint`, `client_list`, `client_revoke`), and escalation (`world_raise`).
+   - `world_raise` asks the human who owns the world for help. It spends a person's attention, so search memory first and use it only when someone is waiting and neither your knowledge nor this memory can answer them. You do not learn the address or the channel, and **no reply comes back through it** — tell the person a human has been told, never that an answer is coming. One raise per world per minute.
    - A minted client credential reaches the same world but is not offered `memory_forget`. A key opens the house; it does not burn it down.
-   - One Night Memory (ONS) is a free room: the four memory tools, the handoff mailbox, and `world_list` — no keys. It stays available while it is used; a room left inactive long enough is forgotten — its token is revoked and both its memory file and its mailbox are deleted.
+   - One Night Memory (ONS) is a free room: the four memory tools, the handoff mailbox, and `world_list` — no keys, and no `world_raise`, because a room nobody signed into has no owner to reach. It stays available while it is used; a room left inactive long enough is forgotten — its token is revoked and both its memory file and its mailbox are deleted.
 3. Do not infer a paid entitlement from tool names alone. An expiry supplied with the connection establishes ONS. A four-tool connection without expiry may be local OSS.
 4. If tools are missing, explain which installation or connection step remains. Do not claim success from configuration text alone.
 

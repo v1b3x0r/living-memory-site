@@ -8,6 +8,58 @@
 // cannot talk about.
 import { SERVER_NAMES } from "./install-copy.ts";
 
+/* THE TOOL SURFACE, AS DATA, because the prose below is rendered from it.
+ *
+ * Until 2026-09-05 this section carried the sentence "the authenticated hosted world has eleven
+ * tools" beside a hand-written list. Shipping a twelfth left the sentence false, the list short,
+ * and the test that asserted the word `eleven` green. A count that is typed is a count that goes
+ * stale on a day when nobody edits this file — so there is no longer a count to type: the list is
+ * the count, and the document is generated from it.
+ *
+ * Grouped rather than flat because several tools share one explanation, and splitting them would
+ * repeat the explanation once per name — which is the same duplication problem one level down. */
+const TOOL_GROUPS = [
+  {
+    names: ["memory_add", "memory_search", "memory_state", "memory_forget"],
+    text: "the memory surface.",
+  },
+  {
+    names: ["handoff_post", "handoff_list", "handoff_read"],
+    text: `a private 1\u201372 hour message bus
+  between the human's authorized agents. Notes are exact, not embedded. The
+  server stamps \`from\` and \`via\` on every note; a client cannot forge either.
+  handoff_list shows the mailbox \u2014 ids, labels, senders, ages \u2014 without reading
+  any note's text, so an older note can be recovered by id rather than by luck.`,
+  },
+  { names: ["client_mint"], text: "issue a revocable URL for an agent that cannot sign in" },
+  { names: ["client_list"], text: "who holds a key, and when each expires" },
+  { names: ["client_revoke"], text: "withdraw a key; what the world remembers is untouched" },
+  {
+    names: ["world_list"],
+    text: `which memory worlds this connection can reach, and which one is
+  used when none is named. Read-only; it names the place, it does not open it.`,
+  },
+  {
+    names: ["world_raise"],
+    text: `ask the human who owns this world for help, when a
+  person is waiting and neither the agent's knowledge nor this memory can answer
+  them. The agent never learns the address or the channel \u2014 the world routes it \u2014
+  and no reply comes back through it. One raise per world per minute.`,
+  },
+] as const;
+
+/** Every tool an owned world offers. The list IS the count; nothing writes the number down. */
+export const WORLD_TOOLS = TOOL_GROUPS.flatMap((g) => g.names.map((name) => ({ name, text: g.text })));
+
+/** What a free room offers. A strict subset, and the two absences are structural, not billing. */
+export const ROOM_TOOLS = [
+  "memory_add", "memory_search", "memory_state", "memory_forget",
+  "handoff_post", "handoff_list", "handoff_read",
+  "world_list",
+];
+
+const TOOL_LIST = TOOL_GROUPS.map((g) => `- ${g.names.join(", ")} \u2014 ${g.text}`).join("\n");
+
 export const LLMS_TXT = `# Living Memory
 
 > One world. You and your agents come and go — across models, devices and apps. Tell one agent
@@ -26,32 +78,25 @@ inactive rooms are eventually forgotten, and a room does not migrate into
 a paid world.
 A **world** is the same place that does not end: what was left in it is still
 there days later, and the timeline keeps walking whether or not anyone is in it.
-A world is $9/month and is tied to a sign-in. The difference is lifetime and
-budget, not capability: a room has every tool a world has, and is metered —
-about 16 memories in total, 300 operations each day, and 8 live handoff
-notes. A world is unmetered.
+A world is $9/month and is tied to a sign-in. A room is metered — about 16
+memories in total, 300 operations each day, and 8 live handoff notes — and a
+world is unmetered. Memory and handoff work identically in both. What a room
+cannot do is anything that needs an OWNER: it holds no keys, and it cannot
+reach a human, because there is no human attached to it. That is a fact about
+what a room is, not a feature held back for payment.
 
 ## The tools, and which surface has them
 
-The authenticated hosted world has eleven tools:
+The authenticated hosted world has these tools:
 
-- memory_add, memory_search, memory_state, memory_forget — the memory surface.
-- handoff_post, handoff_list, handoff_read — a private 1–72 hour message bus
-  between the human's authorized agents. Notes are exact, not embedded. The
-  server stamps \`from\` and \`via\` on every note; a client cannot forge either.
-  handoff_list shows the mailbox — ids, labels, senders, ages — without reading
-  any note's text, so an older note can be recovered by id rather than by luck.
-- client_mint — issue a revocable URL for an agent that cannot sign in
-- client_list — who holds a key, and when each expires
-- client_revoke — withdraw a key; what the world remembers is untouched
-- world_list — which memory worlds this connection can reach, and which one is
-  used when none is named. Read-only; it names the place, it does not open it.
+${TOOL_LIST}
 
-A free room exposes the four memory tools, the handoff mailbox, and world_list —
-no keys. Its notes are capped at 8 live per room and cannot outlive the room.
-Two further limits are structural, not permission checks: the client trio exists
-only for a signed-in owner, and a minted client has no memory_forget handler at
-all. A minted client can read, remember and hand off, and can never delete.
+A free room exposes the memory tools, the handoff mailbox, and world_list. Its
+notes are capped at 8 live per room and cannot outlive the room. The absences
+are structural, not permission checks: the client trio exists only for a
+signed-in owner, world_raise is not registered at all because an anonymous room
+has no owner to reach, and a minted client has no memory_forget handler. A
+minted client can read, remember and hand off, and can never delete.
 
 Before installing or operating Living Memory, read the public agent guide:
 https://viibe.to/living-memory/skills/living-memory/SKILL.md
@@ -81,9 +126,11 @@ first continuity check.
   it goes unused; any successful use keeps it alive. Once forgotten it answers
   410, and its data is then deleted — memories and handoff notes alike. Nothing
   belonging to a room survives it. Rate-limited per address.
-- A room differs from a world by how long it lasts and how much it holds, not by
-  which tools it has: both share memory, hand work between agents, and record
-  which route each note arrived through. A room is metered — roughly 16
+- A room differs from a world in how long it lasts, how much it holds, and the
+  two things that need an owner: it has no keys to mint, and no human to raise
+  to. Memory and handoff are the same in both — they share memory, hand work
+  between agents, and record which route each note arrived through. A room is
+  metered — roughly 16
   memories in total, 300 operations each day (a search counts, it embeds) and 8
   live notes — and answers 429 once a bound is reached. A world is what does not
   end, and is unmetered.

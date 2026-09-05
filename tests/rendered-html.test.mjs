@@ -591,10 +591,14 @@ test("the bare landing path redirects to the canonical one, permanently", async 
 test("llms.txt states the tool surface that actually ships", async () => {
   const body = await (await render({}, "/llms.txt")).text();
 
-  assert.match(body, /eleven tools/);
-  for (const tool of ["client_mint", "client_list", "client_revoke", "world_list", "handoff_list"])
+  // Named tools, never a count. `/eleven tools/` used to stand here and stayed green through the
+  // day a twelfth shipped; tests/llms-tools.test.ts now holds the list-vs-document check, and this
+  // one only confirms the served response carries it. world_raise is listed because it is the
+  // newest and therefore the one a stale document drops first.
+  for (const tool of [
+    "client_mint", "client_list", "client_revoke", "world_list", "handoff_list", "world_raise",
+  ])
     assert.match(body, new RegExp(tool), tool);
-  assert.doesNotMatch(body, /six tools/);
   // The vocabulary, the limitation, and the adoption fact all have to be here:
   // a crawler often reads this file and nothing else.
   assert.match(body, /A \*\*room\*\* is the free instance/);
@@ -606,8 +610,17 @@ test("llms.txt states the tool surface that actually ships", async () => {
   // Superseded 2026-08-29: the landing page now states the free room's budget,
   // so llms.txt saying "not capability" made two surfaces disagree — and this
   // is the file Glama and PulseMCP crawl, so it is the one that travels.
-  assert.match(body, /The difference is lifetime and\nbudget, not capability/);
-  assert.match(body, /about 16 memories in total, 300 operations each day/);
+  // Superseded again 2026-09-05, and the intent kept while the wording went. "not capability"
+  // became false the day world_raise shipped: a room genuinely cannot reach a human, because no
+  // human is attached to one. What the 2026-08-22 rule was defending is that MEMORY AND HANDOFF
+  // are not the paid part — so that is what is asserted now, alongside the negative guards below
+  // which are the half that catches a stale copy riding back in.
+  assert.match(body, /Memory and handoff work identically in both/);
+  assert.match(body, /not a feature held back for payment/);
+  // Whitespace-tolerant on purpose: the previous form pinned where the line happened to wrap,
+  // so rewording the paragraph around it failed the test for a reason that had nothing to do
+  // with the claim. What matters is that the room's budget is stated, not where it breaks.
+  assert.match(body, /about 16\s+memories in total, 300 operations each day/);
   assert.doesNotMatch(body, /a room can do everything a world can/);
   assert.match(body, /Handoff is NOT a paid feature/);
   assert.doesNotMatch(body, /handoff is what\nmakes that true/);
