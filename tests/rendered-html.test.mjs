@@ -60,7 +60,7 @@ test("renders public privacy, terms, and support routes", async () => {
 
   const support = await (await render({}, `${BASE_PATH}/support/`)).text();
   assert.match(support, /Human support/i);
-  assert.match(support, /support@viibe\.to/);
+  assert.match(support, /support@living-memory\.app/);
 });
 
 test("ships the world scene as a direct compressed hero asset", async () => {
@@ -396,12 +396,18 @@ test("says on the landing page what does not work", async () => {
   assert.match(html, /posted 2026-08-29/);
   assert.doesNotMatch(html, /Nothing open right now/);
   assert.doesNotMatch(html, /cannot open a room/i);
-  assert.match(html, /support@viibe\.to/);
+  assert.match(html, /support@living-memory\.app/);
   assert.match(html, new RegExp(`href="${BASE_PATH}/known-issues/"`));
   // The mockup's placeholder address is not a decision.
   assert.doesNotMatch(html, /example\.com/);
-  // support@viibe.to works because Cloudflare Email Routing forwards it and the
-  // catch-all is OFF: any other @viibe.to address on this page would bounce.
+  // support@living-memory.app receives through Resend, whose MX sits on the apex
+  // (moved off support@viibe.to on 2026-09-07 so every address a customer meets
+  // for this product is on the product's own domain). Two things changed with it
+  // and both matter to whoever edits this page next: Resend accepts ANY address
+  // on the domain, so a typo no longer bounces — it silently succeeds and lands
+  // somewhere nobody reads. And there is no forwarding webhook yet, so mail
+  // arrives in the Resend inbox rather than a mailbox: printing a second address
+  // here is cheap to do and expensive to notice.
   assert.doesNotMatch(html, /getsquish\.app/);
 });
 
@@ -536,7 +542,7 @@ test("publishes a security contact through /.well-known/security.txt", async () 
 
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type"), /text\/plain/);
-  assert.match(body, /Contact: mailto:support@viibe\.to/);
+  assert.match(body, /Contact: mailto:support@living-memory\.app/);
   // RFC 9116 requires Expires, and it must still be in the future — a stale
   // date reads as an unmaintained security contact.
   const expires = body.match(/Expires: (.+)/)?.[1];

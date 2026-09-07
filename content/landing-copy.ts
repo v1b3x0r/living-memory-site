@@ -22,7 +22,7 @@
 // line no longer claims handoff as its own; what it claims is how long a note
 // is allowed to live, which is the lifetime-not-capability rule above.
 
-export const FEEDBACK_EMAIL = "support@viibe.to";
+export const FEEDBACK_EMAIL = "support@living-memory.app";
 
 export const landing = {
   nav: {

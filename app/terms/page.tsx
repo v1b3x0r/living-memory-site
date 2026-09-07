@@ -44,7 +44,7 @@ export default function TermsPage() {
         RevenueCat Web Billing with Stripe as the payment processor. It renews automatically each
         month until cancelled. Cancel anytime from the Billing section of your account page after
         signing in, from the subscription-management link in your RevenueCat receipt email, or by
-        emailing <a href="mailto:support@viibe.to">support@viibe.to</a> —
+        emailing <a href="mailto:support@living-memory.app">support@living-memory.app</a> —
         cancellation takes effect at the end of the current paid period, and access runs until then.
         If a renewal payment fails, hosted access lapses until payment succeeds; your stored memory is
         not deleted by a failed payment. After checkout, entitlement activation on the memory server
@@ -75,7 +75,7 @@ export default function TermsPage() {
       <h2>Contact</h2>
       <p>
         Living Memory Engine is operated by Natthawut Phurahong, its verified individual publisher.
-        Questions or requests may be sent to <a href="mailto:support@viibe.to">support@viibe.to</a>.
+        Questions or requests may be sent to <a href="mailto:support@living-memory.app">support@living-memory.app</a>.
       </p>
     </PolicyPage>
   );

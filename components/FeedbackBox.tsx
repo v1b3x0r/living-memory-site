@@ -115,7 +115,7 @@ export function FeedbackBox({ variant = "card" }: { variant?: "card" | "link" })
             </form>
           )}
           <p className="feedback-box__alt">
-            Prefer email? <a href="mailto:support@viibe.to">support@viibe.to</a>
+            Prefer email? <a href="mailto:support@living-memory.app">support@living-memory.app</a>
           </p>
         </>
       )}

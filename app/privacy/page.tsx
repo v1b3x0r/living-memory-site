@@ -122,13 +122,13 @@ export default function PrivacyPage() {
       <h2>Your controls</h2>
       <p>
         You can inspect stored memory with the state tool, delete matching episodic memory with the
-        forget tool, or email <a href="mailto:support@viibe.to">support@viibe.to</a> to request
+        forget tool, or email <a href="mailto:support@living-memory.app">support@living-memory.app</a> to request
         access or deletion. The forget tool performs permanent substring-matched deletion and has no undo.
       </p>
       <h2>Questions</h2>
       <p>
         Living Memory Engine is operated by Natthawut Phurahong, its verified individual publisher.
-        Contact <a href="mailto:support@viibe.to">support@viibe.to</a>. This policy applies to
+        Contact <a href="mailto:support@living-memory.app">support@living-memory.app</a>. This policy applies to
         the hosted service; the local open-source server stores data on the machine where you run it.
       </p>
     </PolicyPage>

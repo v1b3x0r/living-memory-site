@@ -16,7 +16,7 @@ export default function SupportPage() {
       updated="August 29, 2026"
     >
       <p>
-        Email <a href="mailto:support@viibe.to">support@viibe.to</a> for hosted access,
+        Email <a href="mailto:support@living-memory.app">support@living-memory.app</a> for hosted access,
         privacy, deletion, or reliability questions. This is the shared support mailbox for products
         published by Natthawut Phurahong (Living Memory Engine and Squish). Include the approximate
         time of the problem and the client you used. Never email an API key, password, one-time code,

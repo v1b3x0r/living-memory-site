@@ -170,7 +170,7 @@ stops being true.
 - Latest write-up: https://viibe.to/living-memory/whats-new/agents-hand-work/
 - Engine source: https://github.com/v1b3x0r/living-memory-engine
 - npm: https://www.npmjs.com/package/@nature-labs/lme-mcp
-- Contact: support@viibe.to
+- Contact: support@living-memory.app
 - Author: https://v1b3.io
 
 ## Facts an agent should not misstate

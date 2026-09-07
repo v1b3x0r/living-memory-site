@@ -100,7 +100,7 @@ State only what the current service discloses:
 - RevenueCat processes a derived customer identifier and entitlement status.
 - DigitalOcean hosts the service and Cloudflare routes and protects traffic.
 
-Direct privacy, deletion, or reliability questions to `support@viibe.to`. Never include a token, secret, or private memory content in support messages or logs.
+Direct privacy, deletion, or reliability questions to `support@living-memory.app`. Never include a token, secret, or private memory content in support messages or logs.
 
 ## Finish truthfully
 

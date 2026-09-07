@@ -9,7 +9,7 @@
 export const SECURITY_TXT = `# Security contact for viibe.to and its services
 # (Living Memory — lme.viibe.to — and this site).
 
-Contact: mailto:support@viibe.to
+Contact: mailto:support@living-memory.app
 Expires: 2027-08-24T00:00:00.000Z
 Canonical: https://viibe.to/.well-known/security.txt
 Preferred-Languages: en, th

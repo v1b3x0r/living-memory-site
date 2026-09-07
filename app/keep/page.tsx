@@ -177,7 +177,7 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
             <p className="keep-billing__fine">
               There is no payment page for this world — nothing was charged, so
               there is no card, no receipt, and nothing to cancel. Questions:{" "}
-              <a href="mailto:support@viibe.to">support@viibe.to</a>.
+              <a href="mailto:support@living-memory.app">support@living-memory.app</a>.
             </p>
           )}
         </>
@@ -191,7 +191,7 @@ function BillingPanel({ billing }: { billing: Billing | null }) {
           nothing was charged for it, or we could not reach billing a
           moment ago. Your world is unaffected either way. If you do have a
           subscription, the link in your receipt email manages it; otherwise
-          write to <a href="mailto:support@viibe.to">support@viibe.to</a>.
+          write to <a href="mailto:support@living-memory.app">support@living-memory.app</a>.
         </p>
       )}
     </section>
@@ -465,7 +465,7 @@ export default function KeepPage() {
                   <p aria-live="polite">
                     <strong>Checkout opens soon.</strong> We&apos;re finalizing live
                     payment activation — email{" "}
-                    <a href="mailto:support@viibe.to">support@viibe.to</a> and
+                    <a href="mailto:support@living-memory.app">support@living-memory.app</a> and
                     we&apos;ll tell you the moment it&apos;s open.
                   </p>
                 )}

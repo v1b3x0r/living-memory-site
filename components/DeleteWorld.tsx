@@ -194,7 +194,7 @@ export function DeleteWorld({ memories = null, hasBilling = false }: DeleteWorld
               <p>There is no memory world attached to this sign-in.</p>
               <p>
                 If you expected one, <strong>do not create a new subscription</strong> —
-                write to <a href="mailto:support@viibe.to">support@viibe.to</a>.
+                write to <a href="mailto:support@living-memory.app">support@living-memory.app</a>.
                 Signing in with a different provider or email address creates a separate
                 account, and your memories are probably attached to the one you used
                 first.
