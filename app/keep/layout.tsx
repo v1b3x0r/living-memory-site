@@ -1,6 +1,5 @@
 "use client";
-// Scopes the Stytch provider to the /keep checkout page only — same boundary
-// rule as app/oauth/layout.tsx: the rest of the site stays auth-SDK-free.
+// Scope the Stytch provider to /keep; presentation pages stay auth-SDK-free.
 import { type ReactNode } from "react";
 import { StytchProvider } from "../../components/StytchProvider";
 
