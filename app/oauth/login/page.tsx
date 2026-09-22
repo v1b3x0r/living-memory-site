@@ -12,7 +12,7 @@
 //      started all this. The validated relative authorize URL travels in the
 //      Stytch redirect query so this also works across browser profiles and
 //      devices; localStorage remains a same-browser fallback.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStytchB2BClient, useStytchMemberSession } from "@stytch/react/b2b";
 import { BASE_PATH } from "../../../lib/base-path";
 import { AuthAvatar } from "../../../components/AuthAvatar";
@@ -38,7 +38,7 @@ const SESSION_MINUTES = 60;
 // burning it (and against a second tab racing the first).
 let authenticateStarted = false;
 
-type Phase = "form" | "sending" | "sent" | "authenticating" | "signed-in" | "error";
+type Phase = "form" | "sending" | "redirecting" | "sent" | "authenticating" | "signed-in" | "error";
 
 function pendingAuthorizeReturn(): string | null {
   const queryValue = new URLSearchParams(window.location.search).get(OAUTH_RETURN_PARAM);
@@ -77,6 +77,7 @@ export default function OAuthLoginPage() {
   const [phase, setPhase] = useState<Phase>("form");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const oauthStartPending = useRef(false);
 
   // Already signed in (or just finished) → straight back to the authorize
   // request; with nothing stashed, say so instead of hanging forever.
@@ -144,12 +145,18 @@ export default function OAuthLoginPage() {
   // Redirects to the provider; on success Stytch sends the browser back to
   // this page with a discovery_oauth token (same redirect as magic links).
   async function startOAuth(provider: OAuthProvider) {
+    // A second start in this tab can replace the provider state while the
+    // browser is still following the first redirect.
+    if (oauthStartPending.current) return;
+    oauthStartPending.current = true;
+    setPhase("redirecting");
     track("signup_started", { surface: "oauth", method: provider });
     try {
       await stytch.oauth[provider].discovery.start({
         discovery_redirect_url: `${window.location.origin}${loginPathForPendingReturn()}`,
       });
     } catch (e) {
+      oauthStartPending.current = false;
       setError(e instanceof Error ? e.message : String(e));
       setPhase("error");
     }
@@ -172,11 +179,11 @@ export default function OAuthLoginPage() {
         {(phase === "form" || phase === "sending") && (
           <>
             <div className="auth-providers">
-              <button className="button button--secondary" onClick={() => startOAuth("google")}>
+              <button className="button button--secondary" disabled={phase !== "form"} onClick={() => startOAuth("google")}>
                 <GoogleMark />
                 Continue with Google
               </button>
-              <button className="button button--secondary" onClick={() => startOAuth("github")}>
+              <button className="button button--secondary" disabled={phase !== "form"} onClick={() => startOAuth("github")}>
                 <GitHubMark />
                 Continue with GitHub
               </button>
@@ -207,6 +214,10 @@ export default function OAuthLoginPage() {
 
         {phase === "authenticating" && (
           <p className="auth-status" aria-live="polite">Signing you in…</p>
+        )}
+
+        {phase === "redirecting" && (
+          <p className="auth-status" aria-live="polite">Opening your sign-in provider…</p>
         )}
 
         {phase === "signed-in" && (
