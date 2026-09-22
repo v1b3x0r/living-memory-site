@@ -357,52 +357,36 @@ export default function KeepPage() {
         )}
 
         {purchased ? (
-          // The highest-intent page on the site: nobody here needs convincing,
-          // and there is exactly one question — I paid, how do I connect? So the
-          // address IS the page. Two things this copy must never do again:
-          // say "reconnect" (the paid world is a DIFFERENT URL with a different
-          // auth), and offer a check that passes from the trial room. Recall
-          // working proves the room works, not that the subscription landed —
-          // the same false positive as a same-session readback.
+          // A checkout return is only a hint. Show the endpoint and "ready" only
+          // after the entitlement read confirms activation; the CLI uses the
+          // same gate before it opens the World.
           <div aria-live="polite" className="keep-return">
-            {/* h1, not h2: with the storefront heading suppressed this is the
-                page's only top-level heading. */}
-            <h1 className="keep-return__title">Your permanent world is ready.</h1>
-            <p className="keep-return__url">
-              <code>{HOSTED_MCP_URL}</code>
-              <CopyButton text={HOSTED_MCP_URL} label="Copy URL" />
-            </p>
-            <p>
-              Use this URL from now on. Name it{" "}
-              <strong>{SERVER_NAMES.cloud}</strong> so you can tell it apart from
-              any other world you have added.
-            </p>
-            <p>
-              Your trial room is separate. Its memories stay there and expire
-              with it.
-            </p>
-            <ol className="keep-steps">
-              <li>Replace the trial-room URL with this one.</li>
-              <li>Sign in when your AI asks.</li>
-              <li>
-                Ask it to leave a handoff. If handoff is there, you are home.
-              </li>
-            </ol>
-            <p>
-              Agents that cannot sign in — an editor, a CLI, a coding agent — get
-              a key each. Ask any agent already signed in to mint one, or see the{" "}
-              <a href={AGENT_GUIDE_PATH}>setup guide</a>.
-            </p>
-            <p>
-              Activation can take up to a minute. Still locked out after a few
-              minutes? <a href={`${BASE_PATH}/support#billing`}>Billing support</a>.
-            </p>
-            {/* Someone who just paid is the likeliest person to want out again,
-                and this branch used to end here — the self-service control was
-                a sign-out and a sign-in away. Rendered only once entitlement
-                has actually landed: a billing panel shown during the
-                activation minute would report nothing and read as a failure. */}
-            {status?.entitled === true && <BillingPanel billing={status.billing} />}
+            {status?.entitled === true ? (
+              <>
+                <h1 className="keep-return__title">Your permanent world is ready.</h1>
+                <p className="keep-return__url">
+                  <code>{HOSTED_MCP_URL}</code>
+                  <CopyButton text={HOSTED_MCP_URL} label="Copy URL" />
+                </p>
+                <p>Use this URL from now on. Name it <strong>{SERVER_NAMES.cloud}</strong> so you can tell it apart from other worlds.</p>
+                <p>Your trial room is separate. Its memories stay there and expire with it.</p>
+                <ol className="keep-steps">
+                  <li>Replace the trial-room URL with this one.</li>
+                  <li>Sign in when your AI asks.</li>
+                  <li>Ask it to leave a handoff. If handoff is there, you are home.</li>
+                </ol>
+                <p>Using the CLI? Return to your terminal and run <code>lm world</code> with the same account, then <code>lm list</code>.</p>
+                <p>Agents that cannot sign in — an editor or coding agent — get a key each. Ask any agent already signed in to mint one, or see the <a href={AGENT_GUIDE_PATH}>setup guide</a>.</p>
+                <BillingPanel billing={status.billing} />
+              </>
+            ) : (
+              <>
+                <h1 className="keep-return__title">Waiting for your World to activate.</h1>
+                <p>Checkout returned, but World access is not confirmed yet. Activation can take about a minute.</p>
+                <p>Using the CLI? Return to your terminal and run <code>lm world</code> with the same account. It checks access before opening your World.</p>
+                <p>Still locked out after a few minutes? <a href={`${BASE_PATH}/support#billing`}>Billing support</a>.</p>
+              </>
+            )}
           </div>
         ) : !isInitialized ? (
           <p aria-live="polite">Loading…</p>
@@ -424,6 +408,9 @@ export default function KeepPage() {
                 </p>
                 <p>
                   Sign in with this same account from any client that supports it.
+                </p>
+                <p>
+                  Using the CLI? Run <code>lm world</code>, then <code>lm list</code>.
                 </p>
                 {/* Which world is this? It was answerable only before paying: the
                     signed-in line lived in the checkout branch, so the moment
