@@ -12,7 +12,9 @@ export function KnownIssuesStrip() {
       <p className="issues-strip__foot">
         <span>
           {landing.knownIssues.tell}{" "}
-          <a href={`mailto:${FEEDBACK_EMAIL}`}>{FEEDBACK_EMAIL}</a>
+          <a className="inline-link" href={`mailto:${FEEDBACK_EMAIL}`}>
+            {FEEDBACK_EMAIL}
+          </a>
         </span>
         <a className="button button--secondary" href={KNOWN_ISSUES_PATH}>
           {landing.knownIssues.all}

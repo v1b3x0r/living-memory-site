@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { landing } from "../content/landing-copy";
 import {
   CLIENT_TABS,
@@ -91,6 +91,24 @@ export function Installer({ id = "installer" }: { id?: string }) {
   const [grant, setGrant] = useState<OnsGrant | null>(null);
   const [minting, setMinting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const clientTabs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  function selectClient(next: ClientId, focus = false) {
+    setClient(next);
+    if (focus) clientTabs.current[CLIENT_TABS.findIndex((tab) => tab.id === next)]?.focus();
+  }
+
+  function onClientKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
+    const last = CLIENT_TABS.length - 1;
+    let next: number | null = null;
+    if (event.key === "ArrowRight") next = index === last ? 0 : index + 1;
+    if (event.key === "ArrowLeft") next = index === 0 ? last : index - 1;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = last;
+    if (next === null) return;
+    event.preventDefault();
+    selectClient(CLIENT_TABS[next].id, true);
+  }
 
   // A room minted in the hero (HeroMint) is THE room: the steps below carry
   // its real URL instead of a placeholder, and the installer's own mint
@@ -160,27 +178,37 @@ export function Installer({ id = "installer" }: { id?: string }) {
         </div>
       </div>
 
-      <div className="client-tabs" role="tablist" aria-label="MCP client">
-        {CLIENT_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            id={`tab-${tab.id}`}
-            aria-selected={client === tab.id}
-            aria-controls="step-two"
-            className="client-tabs__tab"
-            onClick={() => setClient(tab.id)}
-          >
-            <span className="client-tabs__face">
-              <TabGlyph id={tab.id} />
-              {tab.label}
-            </span>
-            {tab.sublabel !== undefined && (
-              <span className="client-tabs__sublabel">{tab.sublabel}</span>
-            )}
-          </button>
-        ))}
+      <div className="client-tabs-shell">
+        <div className="client-tabs" role="tablist" aria-label="MCP client">
+          {CLIENT_TABS.map((tab, index) => (
+            <button
+              key={tab.id}
+              ref={(element) => {
+                clientTabs.current[index] = element;
+              }}
+              type="button"
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-selected={client === tab.id}
+              aria-controls="step-two"
+              tabIndex={client === tab.id ? 0 : -1}
+              className="client-tabs__tab"
+              onClick={() => selectClient(tab.id)}
+              onKeyDown={(event) => onClientKeyDown(event, index)}
+            >
+              <span className="client-tabs__face">
+                <TabGlyph id={tab.id} />
+                {tab.label}
+              </span>
+              {tab.sublabel !== undefined && (
+                <span className="client-tabs__sublabel">{tab.sublabel}</span>
+              )}
+            </button>
+          ))}
+        </div>
+        <p className="scroll-cue scroll-cue--clients" aria-hidden="true">
+          Swipe for more clients →
+        </p>
       </div>
 
       <ol className="steps">
@@ -242,27 +270,35 @@ export function Installer({ id = "installer" }: { id?: string }) {
           )}
         </li>
 
-        <li className="step" id="step-two" role="tabpanel" aria-labelledby={`tab-${client}`}>
-          <span className="step__index">{landing.installer.steps.two.index}</span>
-          <h3>{landing.installer.steps.two.title}</h3>
-          {two.lines.map((line) => (
-            <p className="step__note" key={line}>
-              {line}
-            </p>
-          ))}
-          {two.code !== undefined && (
-            <>
-              <pre className="code">{two.code}</pre>
-              <CopyButton text={two.code} label="Copy" />
-            </>
-          )}
-          {two.link !== undefined && (
-            <p className="step__note">
-              {two.link.before}
-              <a href={two.link.href}>{two.link.label}</a>
-              {two.link.after}
-            </p>
-          )}
+        <li className="step">
+          <div
+            id="step-two"
+            className="step__tabpanel"
+            role="tabpanel"
+            aria-labelledby={`tab-${client}`}
+            tabIndex={0}
+          >
+            <span className="step__index">{landing.installer.steps.two.index}</span>
+            <h3>{landing.installer.steps.two.title}</h3>
+            {two.lines.map((line) => (
+              <p className="step__note" key={line}>
+                {line}
+              </p>
+            ))}
+            {two.code !== undefined && (
+              <>
+                <pre className="code">{two.code}</pre>
+                <CopyButton text={two.code} label="Copy" />
+              </>
+            )}
+            {two.link !== undefined && (
+              <p className="step__note">
+                {two.link.before}
+                <a href={two.link.href}>{two.link.label}</a>
+                {two.link.after}
+              </p>
+            )}
+          </div>
         </li>
 
         <li className="step">

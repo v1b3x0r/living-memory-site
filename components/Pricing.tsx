@@ -59,32 +59,45 @@ export function Pricing() {
           </a>
         </article>
       </div>
-      <div className="compare__scroll">
-        <table className="compare">
-          <thead>
-            <tr>
-              <th scope="col">{landing.pricing.compare.heading}</th>
-              {landing.pricing.compare.columns.map((column) => (
-                <th scope="col" key={column.name}>
-                  {column.name}
-                  <span className="compare__price">{column.price}</span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {landing.pricing.compare.rows.map((row) => (
-              <tr key={row.label}>
-                <th scope="row">{row.label}</th>
-                {row.cells.map((cell, index) => (
-                  <td key={landing.pricing.compare.columns[index].name}>
-                    <Cell value={cell} />
-                  </td>
+      <div className="compare-shell">
+        <div
+          className="compare__scroll"
+          // A horizontally scrollable region must be keyboard-focusable so the
+          // hidden World column is reachable without a pointer.
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          tabIndex={0}
+          role="region"
+          aria-label="Room and World comparison"
+        >
+          <table className="compare">
+            <thead>
+              <tr>
+                <th scope="col">{landing.pricing.compare.heading}</th>
+                {landing.pricing.compare.columns.map((column) => (
+                  <th scope="col" key={column.name}>
+                    {column.name}
+                    <span className="compare__price">{column.price}</span>
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {landing.pricing.compare.rows.map((row) => (
+                <tr key={row.label}>
+                  <th scope="row">{row.label}</th>
+                  {row.cells.map((cell, index) => (
+                    <td key={landing.pricing.compare.columns[index].name}>
+                      <Cell value={cell} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="scroll-cue scroll-cue--compare" aria-hidden="true">
+          Swipe to compare both plans →
+        </p>
       </div>
       <p className="pricing__assurance">
         <span className="pricing__lock" aria-hidden="true">

@@ -1,7 +1,9 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { landing } from "../content/landing-copy";
-import { AGENT_GUIDE_PATH, KEEP_PATH } from "../lib/install-copy";
+import { KEEP_PATH } from "../lib/install-copy";
 import { launcherUrl } from "../lib/launcher";
-import { KNOWN_ISSUES_PATH, WHATS_NEW_INDEX_PATH } from "../lib/site-links";
 import { LmeMark } from "./LmeMark";
 
 /**
@@ -10,23 +12,44 @@ import { LmeMark } from "./LmeMark";
  * way back in — that page is where they sign in, see the subscription, and
  * sign out.
  *
- * The menu is <details>/<summary>, so it opens with no JavaScript and no
- * hydration. It also keeps this header clear of the auth SDK, which the
- * project boundary (scripts/verify-project-boundary.mjs) does not allow the
- * presentation site to import — so the header links to sign-in rather than
- * reflecting whether you are signed in.
+ * The menu remains native <details>/<summary>, so it opens without JavaScript;
+ * a tiny effect adds Escape-to-close and returns focus to the summary. It also
+ * keeps this header clear of the auth SDK, which the project boundary
+ * (scripts/verify-project-boundary.mjs) does not allow the presentation site
+ * to import — so the header links to sign-in rather than reflecting whether
+ * you are signed in.
  */
 const LINKS = [
-  ...landing.nav.links,
-  { label: "Docs", href: AGENT_GUIDE_PATH },
-  { label: "What's new", href: WHATS_NEW_INDEX_PATH },
+  { label: "How it works", href: launcherUrl("legacy-nav-how", "/reading") },
+  { label: "Explore", href: launcherUrl("legacy-nav-explore", "/lobby/explore") },
+  { label: "Docs", href: launcherUrl("legacy-nav-docs", "/setup") },
 ] as const;
 
 const MENU_ONLY = [
-  { label: "Known issues", href: KNOWN_ISSUES_PATH },
+  { label: "Pricing", href: launcherUrl("legacy-mobile-pricing", "/reading#access") },
+  {
+    label: "Known issues",
+    href: launcherUrl("legacy-mobile-known-issues", "/reading#known-issues"),
+  },
 ] as const;
 
 export function SiteHeader() {
+  const menuRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    const menu = menuRef.current;
+    if (menu === null) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !menu.open) return;
+      menu.open = false;
+      menu.querySelector("summary")?.focus();
+    };
+
+    menu.addEventListener("keydown", closeOnEscape);
+    return () => menu.removeEventListener("keydown", closeOnEscape);
+  }, []);
+
   return (
     <header className="site-header">
       <LmeMark href="#main-content" />
@@ -58,7 +81,7 @@ export function SiteHeader() {
         </a>
       </nav>
 
-      <details className="nav-menu">
+      <details className="nav-menu" ref={menuRef}>
         <summary aria-label="Menu">
           <span className="nav-menu__bars" aria-hidden="true" />
         </summary>

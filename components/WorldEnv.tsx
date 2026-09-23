@@ -1,17 +1,14 @@
 import { BASE_PATH } from "../lib/base-path";
 
 /**
- * The world, as the surface of the page (reskin round 2, 2026-08-24 —
- * founder-approved STRUCTURAL). One fixed, full-viewport environment layer:
- * the hero is a transparent window onto it, and the opaque content panels
- * scroll over it, so the gaps between sections keep revealing the same world
- * instead of every section paying for its own illustration.
+ * The world, as the surface of the Hero. The environment is absolute inside
+ * this section and clipped to its bounds, so its tint cannot leak through the
+ * notice above the Hero or the paper sections below it.
  *
- * A fixed element, deliberately not `background-attachment: fixed` — iOS
- * Safari does not honor that, this it honors. One <picture>, two crops:
- * the browser downloads ONLY the crop its viewport needs (hiding an <img>
- * with display:none never stopped the other download — Codex, PR #18).
- * The 900px switch matches the layout breakpoint in globals.css.
+ * One <picture>, two crops: the browser downloads ONLY the crop its viewport
+ * needs (hiding an <img> with display:none never stopped the other download —
+ * Codex, PR #18). The 900px switch matches the layout breakpoint in
+ * globals.css.
  */
 export function WorldEnv() {
   return (

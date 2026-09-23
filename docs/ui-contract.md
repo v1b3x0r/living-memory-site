@@ -25,23 +25,22 @@ capability). Components own layout, not copy. A copy change is its own diff.
 `<DontNeedThis/>` → `<WhatItsFor/>` → `<Pricing/>` → `<KnownIssuesStrip/>` →
 `<SiteFooter/>`
 
-**Shell (STRUCTURAL, founder-approved rounds 1b–2, 2026-08-23/24):** the page
-has two layers. `<WorldEnv/>` is ONE fixed full-viewport environment layer
-(a fixed element, never `background-attachment: fixed` — iOS) holding the
-world scene: wide crop right-anchored on wide screens, tall crop
-bottom-anchored on phones (its upper half is paper, drawn as the copy's
-ground). `<Hero/>` is a transparent window onto it, outside the constrained
-`<main>` column, with `<SiteHeader/>` overlaid and copy in an inner
-`--page`-aligned grid. Opaque panels scroll over the environment; the gaps
-between sections keep revealing the same world — no section pays for its own
-illustration. `<DontNeedThis/>` is deliberately NOT a panel (see its entry).
+**Shell (STRUCTURAL, founder-approved rounds 1b–2, 2026-08-23/24; responsive
+refinement 2026-09-24):** `<Hero/>` is a full-bleed band outside the
+constrained `<main>` column. `<WorldEnv/>` is rendered inside it as one
+absolute, clipped environment layer: the wide crop fills the Hero with
+`object-fit: cover`, while phones use the tall crop. The dark tint and scene
+stop at the Hero boundary instead of leaking through the notice above or the
+paper sections below. `<SiteHeader/>` overlays the scene and copy sits in an
+inner `--page`-aligned grid. `<DontNeedThis/>` is deliberately NOT a panel
+(see its entry).
 
 ---
 
 ### `<SiteHeader/>`
 used:   rendered inside `<Hero/>` (x1); every page via layout
 props:  none — links from `landing.nav` + site-links
-states: wide (inline nav) · narrow (`<details>` hamburger, works with no JS)
+states: wide (inline nav) · narrow (`<details>` hamburger; native open/close plus Escape-to-close and focus return)
 holds:  may not import the auth SDK (project boundary) — "Sign in" is a link,
         never a reflected auth state. CTA button must stay in the nav.
 
@@ -49,14 +48,13 @@ holds:  may not import the auth SDK (project boundary) — "Sign in" is a link,
 used:   / (x1) — full-bleed shell outside <main> (see Shell note above)
 props:  none — copy from `landing.hero` (headline · support[3] · cta ·
         ctaNote · trust[3])
-states: default · narrow (scene behind copy, top-anchored, bottom fade)
+states: default · narrow (scene behind copy, cover-fitted and bottom-weighted)
 holds:  h1 is the product's one-sentence frame ("One world. You and your
         agents come and go." — relocked 2026-08-23) and llms.txt's blockquote
-        must agree with it. The hero owns NO scene since round 2 — the world
-        lives in <WorldEnv/> (the whale lives in the header mark). Trust row
-        is plain text joined by "·", not badges. Copy must stay on the
-        scene's paper-fade region — never on the busy part of the
-        illustration.
+        must agree with it. The Hero owns its clipped `<WorldEnv/>` scene; the
+        whale lives in the header mark. Trust row is plain text joined by "·",
+        not badges. Copy must stay on the scene's dark tint — never on an
+        unprotected part of the illustration.
 
 ### `<WhatHappened/>`
 used:   / (x1)
@@ -99,16 +97,16 @@ holds:  the two axes move DIFFERENT steps; steps 1 and 3 are identical for
         a "don't post or screenshot" caption. Warning band: rooms expire,
         cloud/local don't sync. Monospace blocks must stay readable at 320px.
 
-### `<WorldEnv/>` (round 2)
-used:   / (x1) — first child of the page, fixed behind everything
+### `<WorldEnv/>` (round 2; Hero-scoped 2026-09-24)
+used:   / (x1) — first child inside `<Hero/>`, absolute and clipped to it
 props:  none — two crops of the scene (lme-world.webp · lme-world-mobile.webp)
-states: wide (≥900px, right-anchored) · tall (<900px, bottom-anchored)
-holds:  aria-hidden, pointer-events: none, z-index below all content. The
-        only ENVIRONMENT on the page — sections may not add their own
-        scenes, with ONE carved exception: <HowAWorldWorks/> carries
-        narrative plate artwork (same watercolor system, rendered in flow,
-        never a second fixed layer). Swapping the artwork is TOKENS-ONLY;
-        adding a second environment layer or parallax is STRUCTURAL.
+states: wide (≥900px, cover-fitted) · tall (<900px, cover-fitted and bottom-weighted)
+holds:  aria-hidden, pointer-events: none, z-index below Hero content. The
+        only ENVIRONMENT layer — sections may not add their own scenes, with
+        ONE carved exception: <HowAWorldWorks/> carries narrative plate
+        artwork (same watercolor system, rendered in flow, never a second
+        environment layer). Swapping the artwork is TOKENS-ONLY; adding a
+        second environment layer or parallax is STRUCTURAL.
 
 ### `<DontNeedThis/>`
 used:   / (x1)
@@ -188,7 +186,7 @@ layout:
   page width    --page: min(100% - clamp(2rem,8vw,9rem), 90rem)
   gaps          clamp()-based, ~1rem–3rem
   radius        1px dominates (sharp, print-like); pills/round = 999px/50%
-  ticker        --ticker-height: 2.4rem
+  ticker        --ticker-height: 2.75rem
 
 illustration:  watercolor blue system (whale on hero today; the round-table /
                arch / walking-figures direction from the v2 draft is the
@@ -201,12 +199,12 @@ motion:        restrained; everything must respect prefers-reduced-motion
 
 ## Hard invariants (not tokens, not up for redraw)
 
-- Paper wash is the lighting system (design ruling 2026-08-24): preserve the
-  fixed world environment; solve text contrast LOCALLY with translucent
-  paper-wash gradients/scrims, never by giving a section an opaque
-  background. Nav = top gradient scrim; hero copy = breakpoint-local wash
-  only where needed; footer alone may carry a stronger translucent paper
-  surface (~0.9) so the world dissolves back into paper at the end.
+- Paper wash is the lighting system (design ruling 2026-08-24): the Hero-scoped
+  world environment is clipped to its band; solve text contrast LOCALLY with
+  translucent paper-wash gradients/scrims, never by giving a section an opaque
+  background. Nav = top gradient scrim; Hero copy = breakpoint-local wash only
+  where needed; the Footer alone may carry a stronger translucent paper
+  surface (~0.9) as the page returns to paper.
 
 - Two readers: humans and agents. llms.txt / SKILL.md must keep agreeing with
   the page.

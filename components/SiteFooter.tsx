@@ -3,18 +3,14 @@ import { landing } from "../content/landing-copy";
 import { BASE_PATH } from "../lib/base-path";
 import { launcherUrl } from "../lib/launcher";
 import { AGENT_GUIDE_PATH, GITHUB_URL, NPM_URL } from "../lib/install-copy";
-import {
-  KNOWN_ISSUES_PATH,
-  PRIVACY_PATH,
-  SUPPORT_PATH,
-  TERMS_PATH,
-  WHATS_NEW_INDEX_PATH,
-} from "../lib/site-links";
+import { PRIVACY_PATH, SUPPORT_PATH, TERMS_PATH } from "../lib/site-links";
 
 /**
- * Every link here resolves to a page that exists. Section anchors are absolute
- * rather than bare fragments because this footer renders on /privacy and
- * /keep too, where "#pricing" would go nowhere.
+ * Product surfaces, developer entry points, and trust destinations are separate
+ * so the footer can keep growing without turning into a feature list. Every
+ * destination below was checked against the current site or Launcher before it
+ * was added; product directories are linked from their actual index rather
+ * than from invented standalone routes.
  *
  * No Discord: there is no staffed one, and an empty server is visible
  * abandonment. No email capture: a form that goes nowhere does not belong on a
@@ -24,34 +20,59 @@ const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "How it works", href: `${BASE_PATH}/#installer` },
-      { label: "Pricing", href: `${BASE_PATH}/#pricing` },
-      { label: "What it's for", href: `${BASE_PATH}/#what-its-for` },
+      { label: "How it works", href: launcherUrl("legacy-footer-how", "/reading") },
+      { label: "Rooms & Worlds", href: launcherUrl("legacy-footer-lobby", "/lobby") },
+      { label: "Pricing", href: launcherUrl("legacy-footer-pricing", "/reading#access") },
+    ],
+  },
+  {
+    title: "Explore",
+    links: [
+      {
+        label: "Public rooms & Time Capsule",
+        href: launcherUrl("legacy-footer-explore", "/lobby/explore"),
+      },
+      {
+        label: "Enter a room address",
+        href: launcherUrl("legacy-footer-theatre", "/theatre"),
+      },
     ],
   },
   {
     title: "Developers",
     links: [
-      { label: "Docs", href: AGENT_GUIDE_PATH },
-      { label: "npm", href: NPM_URL },
-      { label: "GitHub", href: GITHUB_URL },
+      { label: "Guides", href: launcherUrl("legacy-footer-docs", "/setup") },
+      { label: "Agent guide", href: AGENT_GUIDE_PATH },
+      { label: "CLI", href: "https://cli.living-memory.app" },
+      {
+        label: "Engine on npm",
+        href: "https://www.npmjs.com/package/@nature-labs/living-memory-engine",
+      },
+      { label: "Local MCP on npm", href: NPM_URL },
+      {
+        label: "JavaScript SDK on npm",
+        href: "https://www.npmjs.com/package/@nature-labs/living-memory-js",
+      },
+      { label: "Engine source", href: GITHUB_URL },
       { label: "llms.txt", href: `${BASE_PATH}/llms.txt` },
     ],
   },
   {
-    title: "Company",
+    title: "Trust & company",
     links: [
+      {
+        label: "What's new",
+        href: launcherUrl("legacy-footer-whats-new", "/whats-new"),
+      },
+      {
+        label: "Known issues",
+        href: launcherUrl("legacy-footer-known-issues", "/reading#known-issues"),
+      },
+      { label: "Status", href: "https://status.viibe.to/living-memory" },
       { label: "Privacy", href: PRIVACY_PATH },
       { label: "Terms", href: TERMS_PATH },
       { label: "Support", href: SUPPORT_PATH },
-    ],
-  },
-  {
-    title: "More",
-    links: [
-      { label: "What's new", href: WHATS_NEW_INDEX_PATH },
-      { label: "Known issues", href: KNOWN_ISSUES_PATH },
-      { label: "Status", href: "https://status.viibe.to/living-memory" },
+      { label: "Security", href: "https://viibe.to/.well-known/security.txt" },
     ],
   },
 ] as const;
@@ -94,7 +115,7 @@ export function SiteFooter() {
             <a
               href="https://www.stork.ai/en/living-memory-mcp"
               target="_blank"
-              rel="noopener"
+              rel="noreferrer"
             >
               <img
                 src="https://www.stork.ai/badge/verified-dark.svg"
@@ -106,7 +127,7 @@ export function SiteFooter() {
             <a
               href="https://launchstag.com/p/tool-1786931000971"
               target="_blank"
-              rel="noopener"
+              rel="noreferrer"
             >
               <img
                 src="https://launchstag.com/badge-light.svg"
@@ -118,7 +139,7 @@ export function SiteFooter() {
             <a
               href="https://postyourstartup.co/startup/living-memory?ref=badge"
               target="_blank"
-              rel="noopener"
+              rel="noreferrer"
             >
               <img
                 src="https://postyourstartup.co/api/badge/living-memory?theme=dark"
