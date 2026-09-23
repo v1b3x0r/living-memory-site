@@ -9,7 +9,7 @@
 // Privacy contract (same as telemetry.ts): auto-attached context is kind +
 // path only. No world content, no diagnostics, nothing the visitor did not
 // type themselves.
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { track } from "../lib/telemetry";
 
 const KINDS = [
@@ -36,6 +36,11 @@ export function FeedbackBox({ variant = "card" }: { variant?: "card" | "link" })
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const successRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (sent) successRef.current?.focus();
+  }, [sent]);
 
   const path = typeof window !== "undefined" ? window.location.pathname : "";
 
@@ -72,7 +77,13 @@ export function FeedbackBox({ variant = "card" }: { variant?: "card" | "link" })
   return (
     <div className="feedback-box" data-c="FeedbackBox">
       {sent ? (
-        <p className="feedback-box__thanks">
+        <p
+          className="feedback-box__thanks"
+          ref={successRef}
+          role="status"
+          aria-live="polite"
+          tabIndex={-1}
+        >
           Got it — thank you. If you left an email, we&apos;ll reply there.
         </p>
       ) : (
@@ -86,6 +97,7 @@ export function FeedbackBox({ variant = "card" }: { variant?: "card" | "link" })
               <button
                 key={k.id}
                 type="button"
+                aria-pressed={kind === k.id}
                 className={`feedback-box__chip${kind === k.id ? " feedback-box__chip--on" : ""}`}
                 onClick={() => pick(k.id)}
               >
@@ -98,7 +110,9 @@ export function FeedbackBox({ variant = "card" }: { variant?: "card" | "link" })
               <textarea
                 className="feedback-box__text"
                 rows={3}
-                placeholder="What happened? (optional)"
+                placeholder="What happened? (optional)…"
+                aria-label="What happened? (optional)"
+                autoComplete="off"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
@@ -106,7 +120,10 @@ export function FeedbackBox({ variant = "card" }: { variant?: "card" | "link" })
                 <input
                   className="feedback-box__email"
                   type="email"
-                  placeholder="Email, if you want a reply (optional)"
+                  placeholder="Email, if you want a reply (optional)…"
+                  aria-label="Email, if you want a reply (optional)"
+                  autoComplete="email"
+                  spellCheck={false}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />

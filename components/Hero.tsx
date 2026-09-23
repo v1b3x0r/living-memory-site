@@ -1,6 +1,7 @@
 import { landing } from "../content/landing-copy";
 import { HeroMint } from "./HeroMint";
 import { SiteHeader } from "./SiteHeader";
+import { WorldEnv } from "./WorldEnv";
 
 /**
  * The entrance scene (reskin round 1b, 2026-08-23 — founder-approved
@@ -14,8 +15,10 @@ import { SiteHeader } from "./SiteHeader";
 export function Hero() {
   return (
     <section className="hero" aria-labelledby="hero-title">
-      {/* No background of its own since round 2 — the hero is a transparent
-          window onto <WorldEnv/>, the page-level environment layer. */}
+      {/* The scene belongs to this band. It is not a fixed page environment:
+          tint and artwork stop at the Hero instead of leaking through the
+          notice above it and the paper sections below it. */}
+      <WorldEnv />
       <div className="hero__inner">
         <SiteHeader />
         <div className="hero__copy">

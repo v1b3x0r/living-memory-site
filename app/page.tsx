@@ -10,7 +10,6 @@ import { Telemetry } from "../components/Telemetry";
 import { WebMcpTools } from "../components/WebMcpTools";
 import { WhatHappened } from "../components/WhatHappened";
 import { WhatItsFor } from "../components/WhatItsFor";
-import { WorldEnv } from "../components/WorldEnv";
 
 // Section order is the same on desktop and on a phone; the layout collapses to
 // one column, it does not re-sequence.
@@ -24,7 +23,6 @@ export default function Home() {
       <Telemetry event="landing_view" />
       {/* WebMCP: the same room creator, offered to visiting agents. */}
       <WebMcpTools />
-      <WorldEnv />
       {/* Above the hero, because the hero is this site's own entrance and the
           question the bridge answers comes first: which of the two entrances
           did you just walk through? This page is still the most-landed-on URL

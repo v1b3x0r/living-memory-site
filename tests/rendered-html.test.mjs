@@ -80,6 +80,16 @@ test("ships the world scene as a direct compressed hero asset", async () => {
   assert.ok(art.byteLength < 250_000, "hero art should stay below 250 KB");
 });
 
+test("bounds and covers the hero scene instead of tinting the whole page", async () => {
+  const html = await (await render()).text();
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(html, /class="hero"[\s\S]*?class="world-env"[\s\S]*?class="hero__inner"/);
+  assert.match(css, /\.world-env\s*\{[\s\S]*?position:\s*absolute;/);
+  assert.match(css, /\.world-env__scene\s*\{[\s\S]*?object-fit:\s*cover;/);
+  assert.match(css, /\.hero\s*\{[\s\S]*?overflow:\s*clip;/);
+});
+
 test("keeps the worker image optimizer compatible with Next image URLs", async () => {
   const observed = { assetPath: null, width: null, format: null };
   const worker = await loadWorker();
@@ -212,6 +222,89 @@ test("gives a phone a menu, and both sizes a way to sign in", async () => {
   assert.match(html, /<summary aria-label="Menu">/);
 });
 
+test("header exposes stable product destinations instead of the whole feature list", async () => {
+  const html = await (await render()).text();
+
+  for (const [label, href] of [
+    ["How it works", "https://living-memory.app/reading?from=legacy-nav-how"],
+    ["Explore", "https://living-memory.app/lobby/explore?from=legacy-nav-explore"],
+    ["Docs", "https://living-memory.app/setup?from=legacy-nav-docs"],
+  ]) {
+    assert.ok(html.includes(`href="${href}">${label}</`), `${label} link is missing`);
+  }
+
+  // Pricing and known issues remain available on a phone without crowding the
+  // desktop header with every destination the product owns.
+  assert.ok(
+    html.includes(
+      'href="https://living-memory.app/reading?from=legacy-mobile-pricing#access">Pricing<',
+    ),
+    "mobile pricing link is missing",
+  );
+  assert.ok(
+    html.includes(
+      'href="https://living-memory.app/reading?from=legacy-mobile-known-issues#known-issues">Known issues<',
+    ),
+    "mobile known-issues link is missing",
+  );
+});
+
+test("footer separates product, exploration, developer, and trust destinations", async () => {
+  const html = await (await render()).text();
+
+  for (const title of ["Product", "Explore", "Developers", "Trust &amp; company"]) {
+    assert.ok(html.includes(`aria-label="${title}">`), `${title} footer column is missing`);
+  }
+
+  for (const [label, href] of [
+    ["How it works", "https://living-memory.app/reading?from=legacy-footer-how"],
+    ["Rooms & Worlds", "https://living-memory.app/lobby?from=legacy-footer-lobby"],
+    ["Pricing", "https://living-memory.app/reading?from=legacy-footer-pricing#access"],
+    [
+      "Public rooms & Time Capsule",
+      "https://living-memory.app/lobby/explore?from=legacy-footer-explore",
+    ],
+    [
+      "Enter a room address",
+      "https://living-memory.app/theatre?from=legacy-footer-theatre",
+    ],
+    ["Guides", "https://living-memory.app/setup?from=legacy-footer-docs"],
+    ["CLI", "https://cli.living-memory.app"],
+    [
+      "Engine on npm",
+      "https://www.npmjs.com/package/@nature-labs/living-memory-engine",
+    ],
+    ["Local MCP on npm", "https://www.npmjs.com/package/@nature-labs/lme-mcp"],
+    [
+      "JavaScript SDK on npm",
+      "https://www.npmjs.com/package/@nature-labs/living-memory-js",
+    ],
+    ["Engine source", "https://github.com/v1b3x0r/living-memory-engine"],
+    ["What's new", "https://living-memory.app/whats-new?from=legacy-footer-whats-new"],
+    [
+      "Known issues",
+      "https://living-memory.app/reading?from=legacy-footer-known-issues#known-issues",
+    ],
+    ["Status", "https://status.viibe.to/living-memory"],
+    ["Security", "https://viibe.to/.well-known/security.txt"],
+  ]) {
+    const renderedLabel = label
+      .replaceAll("&", "&amp;")
+      .replaceAll("'", "&#x27;");
+    assert.ok(
+      html.includes(`href="${href}">${renderedLabel}</`),
+      `${label} link is missing`,
+    );
+  }
+
+  // Privacy, Terms, and Support stay on this site where they are served; the
+  // current Launcher has a consolidated policy document, but this pass is not
+  // allowed to change policy routing.
+  for (const route of ["privacy", "terms", "support"]) {
+    assert.match(html, new RegExp(`href="${BASE_PATH}/${route}/"`));
+  }
+});
+
 test("shows what happened on 15 August without printing a room id", async () => {
   const html = await (await render()).text();
 
@@ -272,6 +365,15 @@ test("keeps steps 1 and 3 identical for every client, and warns about the two ra
     html,
     /Inactive rooms are eventually forgotten, and cannot be migrated to a paid world\./,
   );
+  // The client chooser uses the complete ARIA tab pattern: one tab stop, arrow
+  // navigation handled by the component, and a real tabpanel element nested
+  // inside the ordered-list item rather than replacing its list semantics.
+  assert.match(html, /class="client-tabs-shell">[\s\S]*?role="tablist" aria-label="MCP client"/);
+  assert.match(html, /class="scroll-cue scroll-cue--clients" aria-hidden="true">[\s\S]*?Swipe for more clients/);
+  assert.match(html, /role="tablist" aria-label="MCP client"/);
+  assert.match(html, /id="tab-chatgpt" aria-selected="true" aria-controls="step-two" tabindex="0"/);
+  assert.match(html, /id="tab-cursor" aria-selected="false" aria-controls="step-two" tabindex="-1"/);
+  assert.match(html, /<li class="step"><div id="step-two" class="step__tabpanel" role="tabpanel" aria-labelledby="tab-chatgpt" tabindex="0"/);
   // Every client tab is reachable, and each server is named distinctly.
   for (const tab of ["ChatGPT", "Cursor", "Claude Code", "Any MCP client"])
     assert.match(html, new RegExp(tab));
@@ -318,6 +420,14 @@ test("prices a room and a world as different kinds of thing", async () => {
   assert.match(html, /Handoff notes last up to 72 hours\./);
   assert.match(html, /Create your world — \$9 \/ month/);
   assert.match(html, new RegExp(`href="${BASE_PATH}/keep/"`));
+  assert.match(
+    html,
+    /class="compare-shell">[\s\S]*?class="compare__scroll" tabindex="0" role="region" aria-label="Room and World comparison"/,
+  );
+  assert.match(
+    html,
+    /class="scroll-cue scroll-cue--compare" aria-hidden="true">[\s\S]*?Swipe to compare both plans/,
+  );
   assert.match(html, /A key opens the world; it cannot burn it down\./);
 
   // There is no multi-world plan, and the paid tier is never called a room.
@@ -508,6 +618,7 @@ test("a one-tap feedback box sits where people get stuck, and stays quiet on the
   const support = await (await render({}, `${BASE_PATH}/support/`)).text();
   assert.match(support, /data-c="FeedbackBox"/);
   assert.match(support, /Something failed/);
+  assert.match(support, /aria-pressed="false"[^>]*class="feedback-box__chip/);
   assert.match(support, /One tap is enough/);
 
   // Unobtrusive opener on the landing: a passer-by sees one quiet line,

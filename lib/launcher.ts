@@ -24,6 +24,13 @@
  */
 export const LAUNCHER_ORIGIN = "https://living-memory.app";
 
-/** @param source which bridge this link is — see the call sites. */
-export const launcherUrl = (source: string) =>
-  `${LAUNCHER_ORIGIN}/?from=${source}`;
+/**
+ * @param source which bridge this link is — see the call sites.
+ * @param path a stable route on the current Launcher, when the bridge should
+ * land on a product surface instead of its entrance.
+ */
+export const launcherUrl = (source: string, path = "/") => {
+  const url = new URL(path, LAUNCHER_ORIGIN);
+  url.searchParams.set("from", source);
+  return url.toString();
+};
