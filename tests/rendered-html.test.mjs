@@ -46,10 +46,10 @@ test("renders public privacy, terms, and support routes", async () => {
 
   const privacy = await (await render({}, `${BASE_PATH}/privacy/`)).text();
   assert.match(privacy, /Privacy policy/);
-  assert.match(privacy, /Google Gemini API/);
+  assert.match(privacy, /OpenRouter/);
   assert.match(privacy, /operated by Natthawut Phurahong/);
   assert.match(privacy, /left inactive for an extended period \(currently about 21 days\)/);
-  assert.match(privacy, /Handoff notes are not embedded or sent to Google/);
+  assert.match(privacy, /Handoff notes are not embedded or sent to OpenRouter/);
   assert.match(privacy, /Stytch processes sign-in and session data/);
   assert.match(privacy, /RevenueCat processes a derived customer identifier/);
   assert.match(privacy, /24 hours by default/);
