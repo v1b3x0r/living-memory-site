@@ -37,7 +37,7 @@ export default function PrivacyPage() {
       <h2>Service providers</h2>
       <p>
         Hosted memory text and search queries are sent to OpenRouter to create embeddings with
-        OpenAI&apos;s text-embedding-3-small model. OpenRouter routes these requests to an upstream
+        OpenAI&apos;s text-embedding-3-large model. OpenRouter routes these requests to an upstream
         provider, currently OpenAI or Azure. Handoff notes are not embedded or sent to OpenRouter.
         Stytch processes sign-in and session data;
         RevenueCat processes a derived customer identifier and entitlement status; DigitalOcean hosts
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
       </p>
       <p>
         To make a memory searchable, we send its full, unchanged text to OpenRouter&apos;s embeddings API
-        for the openai/text-embedding-3-small model, then store the numeric vector it returns. Search
+        for the openai/text-embedding-3-large model, then store the numeric vector it returns. Search
         queries are sent the same way. Handoff notes are stored and returned exactly as written; they
         are never embedded. During this provider change, existing memory text is sent again to create
         new vectors in the OpenRouter model space.
