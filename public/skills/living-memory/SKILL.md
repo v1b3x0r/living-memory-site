@@ -94,8 +94,8 @@ For ONS, remind the human before ending that the room stays available while it i
 
 State only what the current service discloses:
 
-- Hosted memory text and search queries go to Google Gemini API to create retrieval embeddings.
-- Handoff notes remain exact text and are not embedded or sent to Google.
+- Hosted memory text and search queries go to OpenRouter to create retrieval embeddings with OpenAI's text-embedding-3-large model. OpenRouter routes them to an upstream provider, currently OpenAI or Azure, so that text may leave the hosting region.
+- Handoff notes remain exact text and are not embedded or sent to OpenRouter.
 - Stytch processes hosted sign-in and session data.
 - RevenueCat processes a derived customer identifier and entitlement status.
 - DigitalOcean hosts the service and Cloudflare routes and protects traffic.
