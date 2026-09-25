@@ -12,7 +12,7 @@ export default function TermsPage() {
       bridgeSource="terms"
       eyebrow="SERVICE TERMS"
       title="Terms of use"
-      updated="August 29, 2026"
+      updated="September 25, 2026"
     >
       <p>
         These terms cover the Living Memory Engine hosted service. By using it, you agree to use it
