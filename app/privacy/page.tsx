@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       bridgeSource="privacy"
       eyebrow="DATA PRACTICES"
       title="Privacy policy"
-      updated="August 16, 2026"
+      updated="September 25, 2026"
     >
       <p>
         Living Memory Engine (LME) stores information only when you ask it to remember something
@@ -36,8 +36,10 @@ export default function PrivacyPage() {
       </p>
       <h2>Service providers</h2>
       <p>
-        Hosted memory text and search queries are sent to the Google Gemini API to create embeddings.
-        Handoff notes are not embedded or sent to Google. Stytch processes sign-in and session data;
+        Hosted memory text and search queries are sent to OpenRouter to create embeddings with
+        OpenAI&apos;s text-embedding-3-large model. OpenRouter routes these requests to an upstream
+        provider, currently OpenAI or Azure. Handoff notes are not embedded or sent to OpenRouter.
+        Stytch processes sign-in and session data;
         RevenueCat processes a derived customer identifier and entitlement status; DigitalOcean hosts
         the service; and Cloudflare routes and protects traffic. These providers process only the data
         needed for their role. We will update this policy before changing these material processors.
@@ -77,12 +79,12 @@ export default function PrivacyPage() {
         request — not you, and not us.
       </p>
       <p>
-        <strong>Embedding provider logs — 55 days.</strong> To make memories searchable we send their
-        text to Google’s embedding API. Google retains what is sent for abuse monitoring for up to 55
-        days under its paid API terms. That copy is outside our control, and deleting your world here
-        does not reach into it.
+        <strong>Embedding provider copies.</strong> Google may retain memory text sent before this
+        provider change for up to 55 days under its paid API terms. New embedding requests pass through
+        OpenRouter to its selected upstream provider. OpenRouter says it does not log request text by
+        default, but it logs request metadata, and upstream providers have their own retention rules.
+        Deleting your world here cannot delete copies already held by those providers.
       </p>
-      <p>After those windows pass, nothing of your world remains anywhere we can reach.</p>
       <h2 id="what-we-can-see">What we can see</h2>
       <p>
         Your memories are stored as plain text on our server. They are not encrypted at rest, which
@@ -97,17 +99,18 @@ export default function PrivacyPage() {
         ask us to help with something specific, or if we are legally compelled.
       </p>
       <p>
-        Your memory text does leave our server, once. To make a memory searchable it is sent — in
-        full, unchanged — to Google’s embedding API (gemini-embedding-001), which returns a numeric
-        representation we store alongside it. Your search queries are sent the same way, for the same
-        reason. Handoff notes are not; they are stored and returned exactly as written, and never
-        embedded.
+        To make a memory searchable, we send its full, unchanged text to OpenRouter&apos;s embeddings API
+        for the openai/text-embedding-3-large model, then store the numeric vector it returns. Search
+        queries are sent the same way. Handoff notes are stored and returned exactly as written; they
+        are never embedded. During this provider change, existing memory text is sent again to create
+        new vectors in the OpenRouter model space.
       </p>
       <p>
-        We use Google’s paid API tier, so its paid-service terms apply. We are not claiming your text
-        is never retained there — Google keeps what is sent for abuse monitoring for up to 55 days.
-        Nothing is ever sent to a chat or generative model; the only Google endpoint we call is the
-        one that turns text into vectors.
+        OpenRouter can route this model to OpenAI or Azure. The service calls only an embeddings
+        endpoint, not a chat or generative model. OpenRouter&apos;s
+        {" "}<a href="https://openrouter.ai/docs/guides/privacy/data-collection">data collection</a>
+        {" "}and <a href="https://openrouter.ai/docs/guides/privacy/provider-logging">provider logging</a>
+        {" "}pages explain its logging and upstream retention policies.
       </p>
       <p>
         This is the same for the free rooms and for a paid world. There is no separate, more

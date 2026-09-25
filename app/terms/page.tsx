@@ -12,7 +12,7 @@ export default function TermsPage() {
       bridgeSource="terms"
       eyebrow="SERVICE TERMS"
       title="Terms of use"
-      updated="August 29, 2026"
+      updated="September 25, 2026"
     >
       <p>
         These terms cover the Living Memory Engine hosted service. By using it, you agree to use it
@@ -70,7 +70,7 @@ export default function TermsPage() {
       <h2 id="where">Where your data lives</h2>
       <p>
         On servers operated by DigitalOcean in Singapore (region <code>sgp1</code>). Text sent for
-        embedding is processed by Google under its paid API terms and may leave that region.
+        embedding passes through OpenRouter to an upstream model provider and may leave that region.
       </p>
       <h2>Contact</h2>
       <p>

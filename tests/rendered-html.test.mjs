@@ -46,10 +46,10 @@ test("renders public privacy, terms, and support routes", async () => {
 
   const privacy = await (await render({}, `${BASE_PATH}/privacy/`)).text();
   assert.match(privacy, /Privacy policy/);
-  assert.match(privacy, /Google Gemini API/);
+  assert.match(privacy, /OpenRouter/);
   assert.match(privacy, /operated by Natthawut Phurahong/);
   assert.match(privacy, /left inactive for an extended period \(currently about 21 days\)/);
-  assert.match(privacy, /Handoff notes are not embedded or sent to Google/);
+  assert.match(privacy, /Handoff notes are not embedded or sent to OpenRouter/);
   assert.match(privacy, /Stytch processes sign-in and session data/);
   assert.match(privacy, /RevenueCat processes a derived customer identifier/);
   assert.match(privacy, /24 hours by default/);
@@ -793,9 +793,11 @@ test("llms.txt does not claim it has no limitations while describing one", async
 // A policy page's date is not decoration: it is how someone establishes which
 // version of the cancellation terms they agreed to. Both pages changed their
 // billing instructions on 2026-08-29 while still displaying older dates.
-test("policy pages date themselves to the day their billing terms changed", async () => {
-  for (const path of ["terms", "support"]) {
+// Terms changed again on 2026-09-25 (embedding processor → OpenRouter), so it
+// carries that later date instead.
+test("policy pages date themselves to their latest substantive change", async () => {
+  for (const [path, date] of [["terms", /September 25, 2026/], ["support", /August 29, 2026/]]) {
     const html = await (await render({}, `${BASE_PATH}/${path}/`)).text();
-    assert.match(html, /August 29, 2026/, `${path} must carry the date its billing wording changed`);
+    assert.match(html, date, `${path} must carry the date its wording last changed`);
   }
 });
