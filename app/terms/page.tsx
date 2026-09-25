@@ -70,7 +70,7 @@ export default function TermsPage() {
       <h2 id="where">Where your data lives</h2>
       <p>
         On servers operated by DigitalOcean in Singapore (region <code>sgp1</code>). Text sent for
-        embedding is processed by Google under its paid API terms and may leave that region.
+        embedding passes through OpenRouter to an upstream model provider and may leave that region.
       </p>
       <h2>Contact</h2>
       <p>
