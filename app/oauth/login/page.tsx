@@ -33,6 +33,7 @@ import {
 // The project's max session duration (Stytch SDK default). Raising it is a
 // dashboard setting (SDK configuration), not a code decision.
 const SESSION_MINUTES = 60;
+const PASSWORD_SETUP_PARAM = "setup_password";
 
 // A discovery token is single-use: guard against double effect invocation
 // burning it (and against a second tab racing the first).
@@ -53,7 +54,9 @@ function pendingAuthorizeReturn(): string | null {
 
 function loginPathForPendingReturn(): string {
   const returnTo = pendingAuthorizeReturn();
-  return returnTo ? oauthLoginPath(returnTo) : `${BASE_PATH}/oauth/login`;
+  if (returnTo) return oauthLoginPath(returnTo);
+  const setup = new URLSearchParams(window.location.search).get(PASSWORD_SETUP_PARAM) === "1";
+  return setup ? `${BASE_PATH}/oauth/login?${PASSWORD_SETUP_PARAM}=1` : `${BASE_PATH}/oauth/login`;
 }
 
 /** Resume the pending authorize request if one is carried or stashed. */
@@ -76,8 +79,17 @@ export default function OAuthLoginPage() {
   const { session, isInitialized } = useStytchMemberSession();
   const [phase, setPhase] = useState<Phase>("form");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [setupPassword, setSetupPassword] = useState("");
+  const [showPasswordSetup, setShowPasswordSetup] = useState(false);
+  const [setupStatus, setSetupStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [setupError, setSetupError] = useState("");
   const [error, setError] = useState("");
   const oauthStartPending = useRef(false);
+
+  useEffect(() => {
+    setShowPasswordSetup(new URLSearchParams(window.location.search).get(PASSWORD_SETUP_PARAM) === "1");
+  }, []);
 
   // Already signed in (or just finished) → straight back to the authorize
   // request; with nothing stashed, say so instead of hanging forever.
@@ -142,6 +154,47 @@ export default function OAuthLoginPage() {
     }
   }
 
+  async function signInWithPassword(ev: { preventDefault(): void }) {
+    ev.preventDefault();
+    setPhase("authenticating");
+    track("signup_started", { surface: "oauth", method: "password" });
+    try {
+      const auth = await stytch.passwords.discovery.authenticate({
+        email_address: email,
+        password,
+      });
+      // Password login is for an existing account. Never create a new World
+      // merely because a reviewer entered an address with no organization.
+      const first = auth.discovered_organizations[0];
+      if (!first) throw new Error("No existing Living Memory account was found for this email.");
+      await stytch.discovery.intermediateSessions.exchange({
+        organization_id: first.organization.organization_id,
+        session_duration_minutes: SESSION_MINUTES,
+      });
+      setPassword("");
+      if (!returnToAuthorize()) setPhase("signed-in");
+    } catch (e) {
+      setPassword("");
+      setError(e instanceof Error ? e.message : String(e));
+      setPhase("error");
+    }
+  }
+
+  async function setPasswordForCurrentSession(ev: { preventDefault(): void }) {
+    ev.preventDefault();
+    if (!session) return;
+    setSetupStatus("saving");
+    try {
+      await stytch.passwords.resetBySession({ password: setupPassword });
+      setSetupPassword("");
+      setSetupStatus("saved");
+    } catch (e) {
+      setSetupPassword("");
+      setSetupError(e instanceof Error ? e.message : String(e));
+      setSetupStatus("error");
+    }
+  }
+
   // Redirects to the provider; on success Stytch sends the browser back to
   // this page with a discovery_oauth token (same redirect as magic links).
   async function startOAuth(provider: OAuthProvider) {
@@ -202,6 +255,31 @@ export default function OAuthLoginPage() {
                 {phase === "sending" ? "Sending…" : "Email me a sign-in link"}
               </button>
             </form>
+            <details className="auth-password">
+              <summary>Sign in with a password</summary>
+              <form className="auth-form" onSubmit={signInWithPassword}>
+                <input
+                  type="email"
+                  required
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  aria-label="Password account email"
+                />
+                <input
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  aria-label="Password"
+                />
+                <button type="submit" className="button button--secondary">
+                  Sign in
+                </button>
+              </form>
+            </details>
           </>
         )}
 
@@ -221,10 +299,34 @@ export default function OAuthLoginPage() {
         )}
 
         {phase === "signed-in" && (
-          <p className="auth-status auth-status--done" aria-live="polite">
-            Signed in — now return to your AI client&apos;s tab and press{" "}
-            <strong>Approve</strong> to finish connecting. You can close this tab.
-          </p>
+          showPasswordSetup ? (
+            <div className="auth-password-setup">
+              <p className="auth-status">Signed in. Set a password for this account.</p>
+              {setupStatus === "saved" ? (
+                <p className="auth-status auth-status--done" role="status">Password set. Sign out before testing password login.</p>
+              ) : (
+                <form className="auth-form" onSubmit={setPasswordForCurrentSession}>
+                  <input
+                    type="password"
+                    required
+                    autoComplete="new-password"
+                    value={setupPassword}
+                    onChange={(e) => setSetupPassword(e.target.value)}
+                    aria-label="New password"
+                  />
+                  <button type="submit" className="button button--primary" disabled={setupStatus === "saving"}>
+                    {setupStatus === "saving" ? "Saving…" : "Set password"}
+                  </button>
+                </form>
+              )}
+              {setupStatus === "error" && <p className="auth-error" role="alert">Could not set password: {setupError}</p>}
+            </div>
+          ) : (
+            <p className="auth-status auth-status--done" aria-live="polite">
+              Signed in — now return to your AI client&apos;s tab and press{" "}
+              <strong>Approve</strong> to finish connecting. You can close this tab.
+            </p>
+          )
         )}
 
         {phase === "error" && (

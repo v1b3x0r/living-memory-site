@@ -2143,6 +2143,20 @@ button.button:disabled {
   width: 100%;
 }
 
+.auth-password {
+  margin-top: 1rem;
+}
+
+.auth-password summary {
+  color: var(--ocean-600);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.auth-password .auth-form {
+  margin-top: 0.9rem;
+}
+
 .auth-status {
   margin: 0;
   color: var(--ink);
