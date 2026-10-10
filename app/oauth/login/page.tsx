@@ -116,7 +116,7 @@ export default function OAuthLoginPage() {
           headers: { 'content-type': 'application/json' }, body: JSON.stringify({ session_jwt: jwt, return_to: returnTo }) });
         if (!res.ok) throw new Error('TEST session proof failed.');
       } : undefined;
-    completeAgentIdLogin(stytch.sso, agentIdConfig, params, window.location.origin, proveSession).then(returnTo => {
+    completeAgentIdLogin(stytch.sso, agentIdConfig, params, window.location.origin, stytch.session, proveSession).then(returnTo => {
       try { localStorage.removeItem(OAUTH_RETURN_KEY); } catch { /* optional fallback */ }
       window.location.replace(returnTo);
     }).catch((failure: unknown) => {

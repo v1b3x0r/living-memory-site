@@ -32,6 +32,7 @@ export async function startAgentIdLogin(sso: SsoClient, config: AgentIdLoginConf
 }
 
 export async function completeAgentIdLogin(sso: SsoClient, config: AgentIdLoginConfig, params: URLSearchParams, origin: string,
+  session: { revoke(options: { forceClear: boolean }): Promise<unknown> },
   proveSession?: (jwt: string, returnTo: string) => Promise<void>): Promise<string> {
   const token = params.get('token');
   const returnTo = safeAuthorizeReturn(params.get('return_to'), origin);
@@ -39,13 +40,20 @@ export async function completeAgentIdLogin(sso: SsoClient, config: AgentIdLoginC
     throw new Error('This sign-in expired or is incomplete. Start again from your MCP client.');
   }
   const result = await sso.authenticate({ sso_token: token, session_duration_minutes: 60 });
-  if (!result.member_session) throw new Error('Additional authentication is required. Contact the app administrator.');
-  if (!result.member?.sso_registrations.some(registration => registration.connection_id === config.connectionId)) {
-    throw new Error('The session does not belong to the configured AgentID connection.');
-  }
-  if (proveSession) {
-    if (!result.session_jwt) throw new Error('TEST session proof is missing.');
-    await proveSession(result.session_jwt, returnTo);
+  try {
+    if (!result.member_session) throw new Error('Additional authentication is required. Contact the app administrator.');
+    if (!result.member?.sso_registrations.some(registration => registration.connection_id === config.connectionId)) {
+      throw new Error('The session does not belong to the configured AgentID connection.');
+    }
+    if (proveSession) {
+      if (!result.session_jwt) throw new Error('TEST session proof is missing.');
+      await proveSession(result.session_jwt, returnTo);
+    }
+  } catch (failure) {
+    // authenticate installs the SDK session before these checks. Withdraw it
+    // before rendering an error, so a retry cannot resume a rejected identity.
+    await session.revoke({ forceClear: true });
+    throw failure;
   }
   return returnTo;
 }

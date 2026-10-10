@@ -4,6 +4,7 @@ import { agentIdLoginConfig, startAgentIdLogin, completeAgentIdLogin, cleanAgent
 
 const origin = 'http://localhost:3000';
 const returnTo = '/living-memory/oauth/authorize?client_id=mcp&state=mcp-state&code_challenge=pkce';
+const session = { revoke: async () => {} };
 const config = { connectionId: 'oidc-connection-test-example' };
 test('disabled by default; cannot mix test and live environments', () => {
   assert.equal(agentIdLoginConfig(), null);
@@ -27,7 +28,7 @@ test('SSO starts with the same allowlisted return URL for both new and existing 
     assert.deepEqual(args[0], { sso_token: 'sso-single-use', session_duration_minutes: 60 });
     return { member_session: {}, member: { sso_registrations: [{ connection_id: config.connectionId }] } };
   };
-  assert.equal(await completeAgentIdLogin(sso, config, callback.searchParams, origin), returnTo);
+  assert.equal(await completeAgentIdLogin(sso, config, callback.searchParams, origin, session), returnTo);
   assert.equal(calls, 1);
 });
 test('rejects missing/foreign pending requests before consuming a single-use token', async () => {
@@ -37,12 +38,12 @@ test('rejects missing/foreign pending requests before consuming a single-use tok
   }
   for (const type of ['discovery', 'discovery_oauth', 'sso']) {
     const params = new URLSearchParams({ agentid: '1', token: 'token', stytch_token_type: type, return_to: 'https://evil.example/living-memory/oauth/authorize' });
-    await assert.rejects(completeAgentIdLogin(sso, config, params, origin));
+    await assert.rejects(completeAgentIdLogin(sso, config, params, origin, session));
   }
 });
 test('MFA without a complete session cannot continue to MCP consent', async () => {
   const params = new URLSearchParams({ agentid: '1', token: 'token', stytch_token_type: 'sso', return_to: returnTo });
-  await assert.rejects(completeAgentIdLogin({ start: async () => {}, authenticate: async () => ({}) }, config, params, origin), /Additional authentication/);
+  await assert.rejects(completeAgentIdLogin({ start: async () => {}, authenticate: async () => ({}) }, config, params, origin, session), /Additional authentication/);
 });
 test('callback history keeps pending MCP request but removes token and provider error text', () => {
   const url = new URL('/living-memory/oauth/login?agentid=1&token=secret&stytch_token_type=sso&error=denied&error_description=private', origin);
@@ -55,7 +56,7 @@ test('callback history keeps pending MCP request but removes token and provider 
 test('rejects a session from a different SSO connection', async () => {
   const params = new URLSearchParams({ agentid: '1', token: 'token', stytch_token_type: 'sso', return_to: returnTo });
   const sso = { start: async () => {}, authenticate: async () => ({ member_session: {}, member: { sso_registrations: [{ connection_id: 'oidc-connection-test-other' }] } }) };
-  await assert.rejects(completeAgentIdLogin(sso, config, params, origin), /configured AgentID connection/);
+  await assert.rejects(completeAgentIdLogin(sso, config, params, origin, session), /configured AgentID connection/);
 });
 
 test('TEST proof receives the exact original MCP request before consent and blocks continuation on failure', async () => {
@@ -63,15 +64,53 @@ test('TEST proof receives the exact original MCP request before consent and bloc
   const params = new URLSearchParams({ agentid: '1', token: 'fixture', stytch_token_type: 'sso', return_to: pending });
   const sso = { start: async () => {}, authenticate: async () => ({ member_session: {}, session_jwt: 'fixture-jwt', member: { sso_registrations: [{ connection_id: config.connectionId }] } }) };
   let proved = false;
-  assert.equal(await completeAgentIdLogin(sso, config, params, origin, async (jwt, request) => {
+  assert.equal(await completeAgentIdLogin(sso, config, params, origin, session, async (jwt, request) => {
     assert.equal(jwt, 'fixture-jwt'); assert.equal(request, pending); proved = true;
   }), pending);
   assert.equal(proved, true);
-  await assert.rejects(completeAgentIdLogin(sso, config, params, origin, async () => { throw new Error('proof denied'); }), /proof denied/);
+  await assert.rejects(completeAgentIdLogin(sso, config, params, origin, session, async () => { throw new Error('proof denied'); }), /proof denied/);
 });
 test('browser diagnostics retain safe error identifiers and drop tokens, email, URLs and descriptions', () => {
   const result = agentIdFailureDiagnostic({ error_type: 'invalid_client', request_id: 'request-id-test-example', status_code: 400,
     error_message: 'private email and token', url: '?token=private', access_token: 'private' });
   assert.deepEqual(result, { category: 'SDK_AUTHENTICATION_FAILED', provider_error_type: 'invalid_client', request_id: 'request-id-test-example', http_status: 400 });
   assert.doesNotMatch(JSON.stringify(result), /private|token=|email/);
+});
+
+for (const scenario of ['connection', 'proof', 'missing-proof', 'incomplete-session']) {
+  test(`rejected ${scenario} session is revoked before returning an error`, async () => {
+    let signedIn = false;
+    let revoked = false;
+    const sso = { start: async () => {}, authenticate: async () => {
+      signedIn = true;
+      return { member_session: scenario === 'incomplete-session' ? undefined : {},
+        session_jwt: scenario === 'missing-proof' ? undefined : 'fixture-jwt',
+        member: { sso_registrations: [{ connection_id: scenario === 'connection' ? 'other' : config.connectionId }] } };
+    } };
+    const cleanup = { revoke: async (options: { forceClear: boolean }) => { assert.deepEqual(options, { forceClear: true }); signedIn = false; revoked = true; } };
+    const params = new URLSearchParams({ agentid: '1', token: 'fixture', stytch_token_type: 'sso', return_to: returnTo });
+    await assert.rejects(completeAgentIdLogin(sso, config, params, origin, cleanup, async () => { throw new Error('proof denied'); }));
+    assert.equal(revoked, true);
+    assert.equal(signedIn, false, 'retry has no rejected SDK session to resume');
+  });
+}
+test('a valid AgentID session is retained, and pre-authentication rejection never revokes a human session', async () => {
+  const sso = { start: async () => {}, authenticate: async () => ({ member_session: {}, member: { sso_registrations: [{ connection_id: config.connectionId }] } }) };
+  const untouched = { revoke: async () => assert.fail('must retain session') };
+  const params = new URLSearchParams({ agentid: '1', token: 'fixture', stytch_token_type: 'sso', return_to: returnTo });
+  assert.equal(await completeAgentIdLogin(sso, config, params, origin, untouched), returnTo);
+  params.set('return_to', 'https://foreign.example/');
+  await assert.rejects(completeAgentIdLogin(sso, config, params, origin, untouched));
+});
+
+test('cleanup requests local clearing even when provider revocation is unavailable', async () => {
+  let localSession = true;
+  const sso = { start: async () => {}, authenticate: async () => ({ member_session: {}, member: { sso_registrations: [] } }) };
+  const cleanup = { revoke: async ({ forceClear }: { forceClear: boolean }) => {
+    if (forceClear) localSession = false;
+    throw new Error('provider unavailable');
+  } };
+  const params = new URLSearchParams({ agentid: '1', token: 'fixture', stytch_token_type: 'sso', return_to: returnTo });
+  await assert.rejects(completeAgentIdLogin(sso, config, params, origin, cleanup), /provider unavailable/);
+  assert.equal(localSession, false);
 });
