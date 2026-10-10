@@ -209,6 +209,8 @@ export default function KeepPage() {
   const [debug, setDebug] = useState(false);
   const [status, setStatus] = useState<WorldStatus | null>(null);
   const [statusSubject, setStatusSubject] = useState<string | null>(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusRefresh, setStatusRefresh] = useState(0);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -306,7 +308,7 @@ export default function KeepPage() {
     if (rcUserId) identify(rcUserId);
   }, [rcUserId]);
 
-  // One read once signed in. Until it answers, the page shows no billing claim at
+  // Read once signed in, or on explicit retry. Until it answers, show no billing claim at
   // all — an unknown state renders as silence, never as "you have not paid".
   //
   // ONE READ IS NOT ENOUGH IMMEDIATELY AFTER CHECKOUT. RevenueCat activation can
@@ -321,8 +323,9 @@ export default function KeepPage() {
   // notice below is what a customer sees if the budget runs out.
   useEffect(() => {
     if (!session) return;
+    setStatusLoading(true);
     const jwt = stytch.session.getTokens()?.session_jwt;
-    if (!jwt) return;
+    if (!jwt) { setStatusLoading(false); return; }
     let live = true;
     let tries = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -330,6 +333,7 @@ export default function KeepPage() {
     const read = async () => {
       const s = await fetchWorldStatus(jwt);
       if (!live) return;
+      setStatusLoading(false);
       setStatus(s);
       setStatusSubject(session.member_id);
       const waiting = purchased && s?.entitled !== true && ++tries < ACTIVATION_ATTEMPTS;
@@ -338,7 +342,7 @@ export default function KeepPage() {
     void read();
 
     return () => { live = false; if (timer) clearTimeout(timer); };
-  }, [session, stytch, purchased]);
+  }, [session, stytch, purchased, statusRefresh]);
 
   return (
     <main id="main-content" className="policy-shell keep-shell">
@@ -454,6 +458,15 @@ export default function KeepPage() {
                   >
                     Continue to checkout — $9/month
                   </a>
+                ) : import.meta.env.VITE_AGENTID_ENABLED === "1" && !rcUserId ? (
+                  <div aria-live="polite">
+                    <p>{statusLoading ? "Checking your account…" : "We couldn’t verify your account. Please try again before checkout."}</p>
+                    {!statusLoading && (
+                      <button className="button button--secondary" onClick={() => { setStatusLoading(true); setStatusRefresh(value => value + 1); }}>
+                        Retry account check
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <p aria-live="polite">
                     <strong>Checkout opens soon.</strong> We&apos;re finalizing live
