@@ -4,10 +4,18 @@ import {
   OAUTH_RETURN_PARAM,
   oauthLoginPath,
   safeAuthorizeReturn,
+  mayResumeOAuthSession,
 } from "../lib/oauth-return.ts";
 
 const ORIGIN = "https://viibe.to";
 const AUTHORIZE = "/living-memory/oauth/authorize?client_id=client-1&state=state-1";
+
+test('old Agent session cannot bypass a fresh human provider callback', () => {
+  for (const query of ['token=fixture&stytch_token_type=discovery_oauth', 'token=fixture&stytch_token_type=discovery', 'agentid=1', 'error=access_denied']) {
+    assert.equal(mayResumeOAuthSession(new URLSearchParams(query)), false);
+  }
+  assert.equal(mayResumeOAuthSession(new URLSearchParams('return_to=fixture')), true);
+});
 
 test("accepts only the same-origin OAuth authorize route", () => {
   assert.equal(safeAuthorizeReturn(AUTHORIZE, ORIGIN), AUTHORIZE);

@@ -3,6 +3,11 @@ import { BASE_PATH } from "./base-path.ts";
 export const OAUTH_RETURN_KEY = "lme_oauth_authorize_url";
 export const OAUTH_RETURN_PARAM = "return_to";
 
+/** A newly returned provider token must win over an older browser session. */
+export function mayResumeOAuthSession(params: URLSearchParams): boolean {
+  return params.get('agentid') !== '1' && !params.has('token') && !params.has('error');
+}
+
 const AUTHORIZE_PATH = `${BASE_PATH}/oauth/authorize`;
 // next.config.ts sets trailingSlash:true, so the canonical URL a client is sent to
 // is 308-redirected to the slashed form before this ever runs. Both spellings are

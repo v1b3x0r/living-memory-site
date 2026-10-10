@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { CaptureResult } from "posthog-js";
+
+test("never sends an OAuth callback URL to analytics, including after SPA navigation", () => {
+  const event = { uuid: "x", event: "$pageview", properties: {
+    $current_url: "https://viibe.to/living-memory/oauth/login/?token=private&return_to=private",
+  } } as CaptureResult;
+  assert.equal(dropUnactionableExceptions(event), null);
+});
 import { dropUnactionableExceptions } from "../lib/telemetry.ts";
 
 function exceptionEvent(list: unknown): CaptureResult {

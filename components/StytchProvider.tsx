@@ -16,11 +16,17 @@ export function StytchProvider({ children, apiBase = "issuer" }: { children: Rea
   // caused React #418/#525 — SSR null vs client tree).
   const [stytch, setStytch] = useState<ReturnType<typeof createStytchB2BClient> | null>(null);
   useEffect(() => {
+    // Keep an unconfigured local TEST workspace from silently using live defaults.
+    if (import.meta.env.VITE_AGENTID_TEST_MODE === '1' &&
+        (!import.meta.env.VITE_STYTCH_PUBLIC_TOKEN?.startsWith('public-token-test-') || !import.meta.env.VITE_STYTCH_ISSUER)) return;
     // Google/GitHub return to api.stytch.com in this project. Their discovery
     // start must use that same host; Connected App consent uses the OIDC issuer.
-    const options = apiBase === "issuer" ? { customBaseUrl: STYTCH_API_DOMAIN } : undefined;
-    setStytch(createStytchB2BClient(STYTCH_PUBLIC_TOKEN, options));
+    const publicToken = import.meta.env.VITE_STYTCH_PUBLIC_TOKEN || STYTCH_PUBLIC_TOKEN;
+    const issuer = import.meta.env.VITE_STYTCH_ISSUER || STYTCH_API_DOMAIN;
+    const options = apiBase === "issuer" ? { customBaseUrl: issuer } : undefined;
+    setStytch(createStytchB2BClient(publicToken, options));
   }, [apiBase]);
-  if (!stytch) return null;
+  if (!stytch) return import.meta.env.VITE_AGENTID_TEST_MODE === '1'
+    ? <main className="auth-shell"><div className="auth-card"><h1>AgentID TEST setup</h1><p>Waiting for TEST credentials and configuration. Complete the local setup checklist, then restart this server.</p></div></main> : null;
   return <StytchB2BProvider stytch={stytch}>{children}</StytchB2BProvider>;
 }

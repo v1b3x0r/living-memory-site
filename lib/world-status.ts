@@ -30,6 +30,8 @@ export interface Billing {
 }
 
 export interface WorldStatus {
+  /** Server-owned billing identity; may differ from the provider's member id. */
+  rcUserId?: string;
   entitled: boolean | null;
   billing: Billing | null;
   world: { memories: number } | null;
@@ -37,7 +39,8 @@ export interface WorldStatus {
 
 export async function fetchWorldStatus(jwt: string): Promise<WorldStatus | null> {
   try {
-    const res = await fetch(WORLD_STATUS_URL, {
+    const res = await fetch(import.meta.env?.VITE_LME_REMOTE_BASE
+      ? `${import.meta.env.VITE_LME_REMOTE_BASE.replace(/\/$/, '')}/world/status` : WORLD_STATUS_URL, {
       headers: { authorization: `Bearer ${jwt}` },
     });
     if (!res.ok) return null;

@@ -208,6 +208,7 @@ export default function KeepPage() {
   const [purchased, setPurchased] = useState(false);
   const [debug, setDebug] = useState(false);
   const [status, setStatus] = useState<WorldStatus | null>(null);
+  const [statusSubject, setStatusSubject] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -291,7 +292,11 @@ export default function KeepPage() {
     }
   }
 
-  const rcUserId = session ? rcUserIdFromSub(session.member_id) : null;
+  // With AgentID enabled the backend owns canonical identity; never charge a raw
+  // Stytch member id that would create a second customer after member recreation.
+  const rcUserId = session ? (import.meta.env.VITE_AGENTID_ENABLED === "1"
+    ? (statusSubject === session.member_id && /^oauth_[a-zA-Z0-9_-]+$/.test(status?.rcUserId ?? "") ? status!.rcUserId! : null)
+    : rcUserIdFromSub(session.member_id)) : null;
   const checkoutUrl = rcUserId ? keepCheckoutUrl(rcUserId) : "";
   const accountEmail = member?.email_address ?? null;
 
@@ -326,6 +331,7 @@ export default function KeepPage() {
       const s = await fetchWorldStatus(jwt);
       if (!live) return;
       setStatus(s);
+      setStatusSubject(session.member_id);
       const waiting = purchased && s?.entitled !== true && ++tries < ACTIVATION_ATTEMPTS;
       if (waiting) timer = setTimeout(read, ACTIVATION_POLL_MS);
     };
