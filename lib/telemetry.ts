@@ -36,6 +36,10 @@ let initialized = false;
 export function dropUnactionableExceptions(
   event: CaptureResult | null,
 ): CaptureResult | null {
+  // Also protects SPA navigation when PostHog was initialized on a previous page.
+  const currentUrl = event?.properties?.$current_url;
+  if ((typeof window !== "undefined" && window.location.pathname.startsWith("/living-memory/oauth/")) ||
+      (typeof currentUrl === "string" && /\/living-memory\/oauth\//.test(currentUrl))) return null;
   if (!event || event.event !== "$exception") return event;
   const list = event.properties?.$exception_list;
   if (!Array.isArray(list) || list.length === 0) return event;
@@ -49,7 +53,12 @@ export function dropUnactionableExceptions(
 
 /** Idempotent; safe to call from any client component. No-op outside the browser. */
 export function initTelemetry(): void {
-  if (initialized || typeof window === "undefined") return;
+  if (typeof window === "undefined") return;
+  if (window.location.pathname.startsWith("/living-memory/oauth/")) {
+    if (initialized) posthog.stopSessionRecording();
+    return;
+  }
+  if (initialized) return;
   initialized = true;
   posthog.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
@@ -60,6 +69,7 @@ export function initTelemetry(): void {
 
 export function track(event: string, props?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
+  if (window.location.pathname.startsWith("/living-memory/oauth/")) return;
   initTelemetry();
   posthog.capture(event, props);
 }
@@ -67,6 +77,7 @@ export function track(event: string, props?: Record<string, unknown>): void {
 /** Tie this browser to the opaque billing/server id so funnels join across surfaces. */
 export function identify(rcUserId: string): void {
   if (typeof window === "undefined") return;
+  if (window.location.pathname.startsWith("/living-memory/oauth/")) return;
   initTelemetry();
   posthog.identify(rcUserId);
 }

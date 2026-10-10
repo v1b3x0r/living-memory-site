@@ -23,12 +23,14 @@ import {
   GoogleMark,
   type OAuthProvider,
 } from "../../../components/ProviderMarks";
-import { track } from "../../../lib/telemetry";
+import { initTelemetry, track } from "../../../lib/telemetry";
+import { agentIdLoginConfig, startAgentIdLogin, completeAgentIdLogin, cleanAgentIdCallback, agentIdFailureDiagnostic } from "../../../lib/agentid-login";
 import {
   OAUTH_RETURN_KEY,
   OAUTH_RETURN_PARAM,
   oauthLoginPath,
   safeAuthorizeReturn,
+  mayResumeOAuthSession,
 } from "../../../lib/oauth-return";
 // The project's max session duration (Stytch SDK default). Raising it is a
 // dashboard setting (SDK configuration), not a code decision.
@@ -86,6 +88,44 @@ export default function OAuthLoginPage() {
   const [setupError, setSetupError] = useState("");
   const [error, setError] = useState("");
   const oauthStartPending = useRef(false);
+  const agentCallbackPending = useRef(false);
+  const agentIdConfig = agentIdLoginConfig(import.meta.env.VITE_AGENTID_ENABLED,
+    import.meta.env.VITE_AGENTID_CONNECTION_ID, import.meta.env.VITE_STYTCH_PUBLIC_TOKEN);
+
+  useEffect(() => {
+    initTelemetry(); // Pause any recording started before SPA navigation into OAuth.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("agentid") !== "1" || agentCallbackPending.current) return;
+    // Explicit retries retain the marker but no callback token; show the login form.
+    if (!params.has("token") && !params.has("error")) return;
+    agentCallbackPending.current = true;
+    if (!agentIdConfig || params.has("error")) {
+      window.history.replaceState(null, "", cleanAgentIdCallback(new URL(window.location.href)));
+      setError("AgentID sign-in was cancelled or is unavailable. Start again from your MCP client.");
+      setPhase("error");
+      return;
+    }
+    setPhase("authenticating");
+    // Capture the single-use token in memory, then remove it before any analytics.
+    window.history.replaceState(null, "", cleanAgentIdCallback(new URL(window.location.href)));
+    // Development-only real-provider harness. Never sends a token off this machine.
+    const proveSession = import.meta.env.DEV && import.meta.env.VITE_AGENTID_TEST_MODE === '1' &&
+      window.location.origin === 'http://localhost:3000' && import.meta.env.VITE_AGENTID_SMOKE_ORIGIN === 'http://localhost:3110'
+      ? async (jwt: string, returnTo: string) => {
+        const res = await fetch('http://localhost:3110/session-proof', { method: 'POST',
+          headers: { 'content-type': 'application/json' }, body: JSON.stringify({ session_jwt: jwt, return_to: returnTo }) });
+        if (!res.ok) throw new Error('TEST session proof failed.');
+      } : undefined;
+    completeAgentIdLogin(stytch.sso, agentIdConfig, params, window.location.origin, stytch.session, proveSession).then(returnTo => {
+      try { localStorage.removeItem(OAUTH_RETURN_KEY); } catch { /* optional fallback */ }
+      window.location.replace(returnTo);
+    }).catch((failure: unknown) => {
+      if (proveSession) void fetch('http://localhost:3110/diagnostic', { method: 'POST',
+        headers: { 'content-type': 'application/json' }, body: JSON.stringify(agentIdFailureDiagnostic(failure)) }).catch(() => {});
+      setError("AgentID sign-in could not be completed. Please try again from your MCP client.");
+      setPhase("error");
+    });
+  }, [stytch, agentIdConfig?.connectionId]);
 
   useEffect(() => {
     setShowPasswordSetup(new URLSearchParams(window.location.search).get(PASSWORD_SETUP_PARAM) === "1");
@@ -94,6 +134,8 @@ export default function OAuthLoginPage() {
   // Already signed in (or just finished) → straight back to the authorize
   // request; with nothing stashed, say so instead of hanging forever.
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!mayResumeOAuthSession(params)) return; // process fresh callback before resuming an old identity
     if (isInitialized && session && !returnToAuthorize()) setPhase("signed-in");
   }, [isInitialized, session]);
 
@@ -215,6 +257,21 @@ export default function OAuthLoginPage() {
     }
   }
 
+  async function startAgentId() {
+    if (!agentIdConfig || oauthStartPending.current) return;
+    oauthStartPending.current = true;
+    setPhase("redirecting");
+    try {
+      // Do not silently turn an existing human session into the Agent's identity.
+      if (session) await stytch.session.revoke();
+      await startAgentIdLogin(stytch.sso, agentIdConfig, window.location.origin, pendingAuthorizeReturn());
+    } catch {
+      oauthStartPending.current = false;
+      setError("AgentID sign-in could not start. Please try again from your MCP client.");
+      setPhase("error");
+    }
+  }
+
   return (
     <main className="auth-shell">
       <div className="auth-shell__inner">
@@ -232,6 +289,12 @@ export default function OAuthLoginPage() {
         {(phase === "form" || phase === "sending") && (
           <>
             <div className="auth-providers">
+              {agentIdConfig && (
+                <button className="button button--secondary" disabled={phase !== "form"} onClick={startAgentId}>
+                  <img src={`${BASE_PATH}/agentid.svg`} width="20" height="20" alt="" aria-hidden="true" />
+                  Continue with AgentID
+                </button>
+              )}
               <button className="button button--secondary" disabled={phase !== "form"} onClick={() => startOAuth("google")}>
                 <GoogleMark />
                 Continue with Google

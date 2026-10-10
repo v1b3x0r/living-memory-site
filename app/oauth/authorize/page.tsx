@@ -6,7 +6,7 @@
 // the client with a code (or an OAuth error on deny). No Stytch UI renders
 // here — the prebuilt components crash under this React runtime.
 import { useEffect, useState } from "react";
-import { useStytchB2BClient, useStytchMemberSession } from "@stytch/react/b2b";
+import { useStytchB2BClient, useStytchMemberSession, useStytchMember } from "@stytch/react/b2b";
 import {
   OAUTH_RETURN_KEY,
   oauthLoginPath,
@@ -17,6 +17,8 @@ import { BASE_PATH } from "../../../lib/base-path";
 import { AuthAvatar } from "../../../components/AuthAvatar";
 import { FeedbackBox } from "../../../components/FeedbackBox";
 import { LmeMark } from "../../../components/LmeMark";
+
+import { initTelemetry } from "../../../lib/telemetry";
 
 interface AuthRequest {
   client_id: string;
@@ -45,8 +47,12 @@ function parseRequest(): AuthRequest | null {
 }
 
 export default function OAuthAuthorizePage() {
+  useEffect(() => { initTelemetry(); }, []);
   const stytch = useStytchB2BClient();
   const { session, isInitialized } = useStytchMemberSession();
+  const { member } = useStytchMember();
+  const agentIdentity = import.meta.env.VITE_AGENTID_ENABLED === '1' && member?.sso_registrations.some(
+    registration => registration.connection_id === import.meta.env.VITE_AGENTID_CONNECTION_ID);
   const [request, setRequest] = useState<AuthRequest | null>(null);
   const [clientName, setClientName] = useState<string | null>(null);
   const [scopeDescriptions, setScopeDescriptions] = useState<string[]>([]);
@@ -81,6 +87,15 @@ export default function OAuthAuthorizePage() {
     setRequest(req);
     (async () => {
       try {
+        // Loopback TEST instrumentation only; production never transmits a session here.
+        if (import.meta.env.DEV && import.meta.env.VITE_AGENTID_TEST_MODE === '1' &&
+            window.location.origin === 'http://localhost:3000' && import.meta.env.VITE_AGENTID_SMOKE_ORIGIN === 'http://localhost:3110') {
+          const jwt = stytch.session.getTokens()?.session_jwt;
+          const proof = await fetch('http://localhost:3110/human-session-proof', { method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ session_jwt: jwt, return_to: window.location.pathname + window.location.search }) });
+          if (!proof.ok) throw new Error('TEST human session proof did not complete. Retry from the TEST harness.');
+        }
         const res = await stytch.idp.oauthAuthorizeStart({
           client_id: req.client_id,
           redirect_uri: req.redirect_uri,
@@ -132,6 +147,9 @@ export default function OAuthAuthorizePage() {
         {status === "consent" && (
           <>
             <h1>Authorize {clientName}</h1>
+            {agentIdentity && (
+              <p className="auth-lede">Signed in as the Agent <strong>{member?.email_address}</strong>. This authorizes the Agent&apos;s account.</p>
+            )}
             <p className="auth-lede">
               <strong>{clientName}</strong> is asking to access your Living Memory:
             </p>
