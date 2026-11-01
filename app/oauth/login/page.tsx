@@ -249,6 +249,8 @@ export default function OAuthLoginPage() {
     try {
       await stytch.oauth[provider].discovery.start({
         discovery_redirect_url: `${window.location.origin}${loginPathForPendingReturn()}`,
+        // Google otherwise reuses its current account without offering a switch.
+        ...(provider === "google" ? { provider_params: { prompt: "select_account" } } : {}),
       });
     } catch (e) {
       oauthStartPending.current = false;
