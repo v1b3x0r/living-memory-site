@@ -1,6 +1,6 @@
 ---
 name: living-memory
-description: Operate and explain Living Memory Engine (LME) safely. Use when an agent sees LME memory_add, memory_search, memory_state, memory_forget, handoff_post, handoff_list, handoff_read, world_list, client_mint, client_list, client_revoke, or world_raise tools; when a human asks to install or connect an LME MCP server; or when guiding a first continuity check across sessions, clients, or agents.
+description: Operate and explain Living Memory Engine (LME) safely. Use when an agent sees LME memory_add, memory_search, memory_state, memory_forget, handoff_post, handoff_list, handoff_read, world_list, client_mint, client_list, client_revoke, world_raise, capsule_list, capsule_read, capsule_create, or capsule_append tools, or connects through a read-only Capsule door; when a human asks to install or connect an LME MCP server; or when guiding a first continuity check across sessions, clients, or agents.
 ---
 
 # Living Memory
@@ -80,6 +80,15 @@ Do this after the tools become available:
 7. Call the continuity moment proven only after the fresh session returns the stored fact. A same-session readback proves storage, not cross-session continuity.
 
 For ONS, remind the human before ending that the room stays available while it is used and that a long-idle room is eventually forgotten — the horizon moves with every use, so do not quote an exact expiry time. Do not promise conversion, export, checkout, or permanent retention unless that action is visibly available.
+
+## Capsules and read-only doors
+
+A Capsule is one container of memory with its own members. A signed-in connection may offer `capsule_list`, `capsule_read`, `capsule_create` and `capsule_append`. Pakkana (https://pakkana.app) is the official app for Capsules; it invites members and readers.
+
+1. Call `capsule_list` and say which Capsule you are addressing before you read or add, the same way you name a world.
+2. Add to a Capsule only what its human asks to keep there. Its other members, and every door into it, can read what you add.
+3. A **read-only door** is a link a Capsule's keeper opens for one MCP client, for example with `npx @nature-labs/lm@alpha doors open` (https://docs.living-memory.app/cli). Through a door you get `memory_search` and `memory_state` for that one Capsule and nothing else: you cannot write, forget, post, or reach another Capsule. If the Capsule has no answer, say so.
+4. A door link is a credential. Never repeat it in a reply, a memory, a handoff, a commit or an issue. Its keeper sees when it was last used and can close it at any time; after that every call is refused. Tell the human instead of retrying.
 
 ## Let another agent in — only when a human asks
 
